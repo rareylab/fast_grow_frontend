@@ -1,4 +1,8 @@
 import { createApp } from 'vue'
 import App from './App.vue'
+// necessary for bootstrap functions
+// eslint-disable-next-line no-unused-vars
+import * as boostrap from 'bootstrap'
+import 'bootstrap/dist/css/bootstrap.min.css'
 
-createApp(App).mount('#app')
+window.app = createApp(App).mount('#app')
