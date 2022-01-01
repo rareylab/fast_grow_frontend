@@ -4,10 +4,11 @@
       <div class="col-7 h-100">
         <div id="viewport" class="h-100"></div>
       </div>
-      <div class="col-5 h-100">
+      <div class="col-5 h-100 d-flex flex-column">
         <ul class="nav nav-tabs" role="tablist">
           <li class="nav-item" role="presentation">
             <button
+                id="structure-tab-trigger"
                 class="nav-link active"
                 data-bs-toggle="tab"
                 data-bs-target="#structure-tab"
@@ -19,8 +20,21 @@
               Structure
             </button>
           </li>
+          <li class="nav-item" role="presentation">
+            <button
+                id="ligands-tab-trigger"
+                class="nav-link"
+                data-bs-toggle="tab"
+                data-bs-target="#ligands-tab"
+                type="button"
+                role="tab"
+                aria-controls="ligands-tab"
+            >
+              Ligands
+            </button>
+          </li>
         </ul>
-        <div class="tab-content">
+        <div class="tab-content flex-grow-1" id="tab-content">
           <div
               class="tab-pane fade show active"
               id="structure-tab"
@@ -34,6 +48,19 @@
                 :polling-server="pollingServer"
             ></structure-upload>
           </div>
+          <div
+              class="tab-pane fade h-100"
+              id="ligands-tab"
+              role="tabpanel"
+              aria-labelledby="ligands-tab"
+          >
+            <ligand-choice
+                @register="registerListener"
+                @ligandChosen="ligandChosen"
+                :ligands="ligands"
+                :view="'ligands-tab'"
+            ></ligand-choice>
+          </div>
         </div>
       </div>
     </div>
@@ -41,15 +68,25 @@
 </template>
 
 <script>
+import * as bootstrap from 'bootstrap'
 import * as NGL from 'ngl'
 import { NGLContext } from '@/internal/NGLContext'
-import StructureUpload from '@/components/StructureUpload'
 import { Utils } from '@/internal/Utils'
 import { EnsembleLoader } from '@/internal/EnsembleLoader'
 
+// components
+import StructureUpload from '@/components/StructureUpload'
+import LigandChoice from '@/components/LigandChoice'
+import { StructureUtils } from '@/internal/StructureUtils'
+
 const viewDefinition = {
   'structure-tab': {
-    visible: ['protein', ['ligand', 'ligands']],
+    visible: ['protein', 'pocket', ['ligand', 'ligands']],
+    focus: ['ligand', 'ligands', 'protein']
+  },
+  'ligands-tab': {
+    // both ligands an ligand are visible so both the choices and the chosen are visible
+    visible: ['protein', 'pocket', 'ligands', 'ligand'],
     focus: ['ligand', 'ligands', 'protein']
   }
 }
@@ -57,19 +94,34 @@ const viewDefinition = {
 export default {
   name: 'FastGrow',
   components: {
+    LigandChoice,
     StructureUpload
   },
   data () {
     return {
       structureSubmitError: undefined,
       pollingServer: false,
-      baseUrl: 'http://localhost:8000' // TODO edit in production
+      baseUrl: 'http://localhost:8000', // TODO edit in production
+      ligands: []
     }
   },
   methods: {
-    changeTab (event) {
-      const view = event.target.getAttribute('data-bs-target').slice(1)
-      console.log(view)
+    /**
+     * Change active tab
+     * @param {HTMLElement} tabTrigger
+     */
+    changeTab (tabTrigger) {
+      const tabElement = document.getElementById(tabTrigger)
+      const tab = new bootstrap.Tab(tabElement)
+      tab.show()
+    },
+    /**
+     * Register an NGL listener
+     * @param {string} view to register listener for
+     * @param {function} listener listener to register
+     */
+    registerListener (view, listener) {
+      this.nglContext.registerViewListener(view, listener)
     },
     async structureUpload (event) {
       event.preventDefault()
@@ -83,10 +135,16 @@ export default {
         formData.append('ensemble[]', protein)
       }
       formData.append('ligand', event.target.ligand.files[0])
-      const ensemble = await this.pollUpload(formData)
-      this.nglContext.clearComponents()
-      await new EnsembleLoader(ensemble, this.structureComponents, this.nglContext).run()
-      this.nglContext.render()
+      try {
+        const ensemble = await this.pollUpload(formData)
+        this.nglContext.clearComponents()
+        await new EnsembleLoader(ensemble, this.structureComponents, this.nglContext).run()
+        this.ligands = this.structureComponents.get('ligands').structureModels
+        this.changeTab('ligands-tab-trigger')
+      } catch (error) {
+        this.structureSubmitError = 'An error occurred while uploading the structure'
+        this.pollingServer = false
+      }
     },
     async pollUpload (formData) {
       this.pollingServer = true
@@ -102,6 +160,22 @@ export default {
       }
       this.pollingServer = false
       return ensemble
+    },
+    async ligandChosen (name) {
+      if (!this.nglContext.components.has('ligand')) {
+        this.nglContext.registerComponent('ligand', this.structureComponents.get(name))
+      } else {
+        this.nglContext.replaceComponent('ligand', this.structureComponents.get(name))
+      }
+      const ligand = this.nglContext.components.get('ligand').parents[0]
+      const protein = this.nglContext.components.get('protein').parents[0]
+      const pocketRepresentation = StructureUtils.addPocket(ligand, protein)
+      if (!this.nglContext.components.has('pocket')) {
+        this.nglContext.registerComponent('pocket', pocketRepresentation)
+      } else {
+        this.nglContext.replaceComponent('pocket', pocketRepresentation)
+      }
+      this.nglContext.render()
     }
   },
   mounted () {
@@ -114,7 +188,8 @@ export default {
       this.stage.viewer.handleResize()
     })
     window.addEventListener('show.bs.tab', (event) => {
-      this.changeTab(event)
+      const view = event.target.getAttribute('data-bs-target').slice(1)
+      this.nglContext.switchView(view)
     })
   }
 }

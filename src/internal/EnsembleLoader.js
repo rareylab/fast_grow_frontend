@@ -1,4 +1,5 @@
 import { StructureUtils } from '@/internal/StructureUtils'
+import { StructureModelComponent } from '@/internal/StructureModelComponent'
 import { EnsembleComponent } from '@/internal/EnsembleComponent'
 
 /**
@@ -30,13 +31,15 @@ export class EnsembleLoader {
     this.ensemble.complexes.forEach((complex) => {
       const structurePromise = StructureUtils.addStructure(this.nglContext.stage, complex)
         .then((component) => {
+          complex.component = component
           representations.push(component.addRepresentation('cartoon', { visible: false }))
         })
       structurePromises.push(structurePromise)
     })
     await Promise.all(structurePromises)
-    this.componentMap.set('protein', representations[0])
-    const ensembleComponent = new EnsembleComponent(representations)
+    // const proteinComponent = new StructureModelComponent(this.ensemble.complexes[0], representations[0])
+    // this.componentMap.set('protein', proteinComponent)
+    const ensembleComponent = new EnsembleComponent(this.ensemble.complexes, representations)
     this.componentMap.set('ensemble', ensembleComponent)
     this.nglContext.registerComponent('protein', ensembleComponent)
   }
@@ -48,16 +51,37 @@ export class EnsembleLoader {
   async loadLigands () {
     const structurePromises = []
     const representations = []
+    this.ensemble.ligands.sort(this.compareLigands)
     this.ensemble.ligands.forEach((ligand) => {
       const structurePromise = StructureUtils.addStructure(this.nglContext.stage, ligand)
         .then((component) => {
-          representations.push(component.addRepresentation('licorice', { visible: false }))
+          ligand.component = component
+          const ligandRepr = component.addRepresentation('licorice', { visible: false })
+          // when choosing ligands the choices should by translucent
+          // to differentiate them from chosen ligands
+          const choiceRepr = component.addRepresentation('licorice', {
+            visible: false,
+            opacity: 0.5
+          })
+          representations.push(choiceRepr)
+          this.componentMap.set(ligand.name, new StructureModelComponent(ligand, ligandRepr))
         })
       structurePromises.push(structurePromise)
     })
     await Promise.all(structurePromises)
-    const ligandEnsembleComponent = new EnsembleComponent(representations)
+    const ligandEnsembleComponent = new EnsembleComponent(this.ensemble.ligands, representations)
     this.componentMap.set('ligands', ligandEnsembleComponent)
     this.nglContext.registerComponent('ligands', ligandEnsembleComponent)
+  }
+
+  /**
+   * Sort ligands by file_string length and then name. file_string length is a surrogate for atom
+   * molecule size.
+   */
+  compareLigands (first, second) {
+    if (first.file_string.length !== second.file_string.length) {
+      return first.file_string.length > second.file_string.length ? -1 : 1
+    }
+    return first.name < second.name ? -1 : 1
   }
 }

@@ -37,6 +37,13 @@ export class NGLContext {
     this.components = new Map()
     this.componentSet = new Set()
     this.debug = false
+    this.viewListeners = new Map()
+    this.stage.signals.clicked.add((pickingProxy) => {
+      if (!this.viewListeners.has(this.currentView)) {
+        return
+      }
+      this.viewListeners.get(this.currentView).forEach((listener) => listener(pickingProxy))
+    })
     if (viewDefinition) {
       this.parseViewDefinition(viewDefinition)
     }
@@ -211,6 +218,7 @@ export class NGLContext {
       throw new Error('Tried to replace non-existent component')
     }
     const formerComponent = this.components.get(name)
+    formerComponent.setVisibility(false)
     this.componentSet.delete(formerComponent)
     this.components.set(name, component)
     this.componentSet.add(component)
@@ -222,6 +230,7 @@ export class NGLContext {
    */
   deregisterComponent (name) {
     const formerComponent = this.components.get(name)
+    formerComponent.setVisibility(false)
     if (formerComponent) {
       this.componentSet.delete(formerComponent)
     }
@@ -255,6 +264,9 @@ export class NGLContext {
       // no view definition for current view
       return
     }
+    if (this.debug) {
+      console.log(`Rendering ${view} view`)
+    }
     this.components.forEach((component, key) => {
       if (component.visible) {
         if (this.debug) {
@@ -267,7 +279,7 @@ export class NGLContext {
       // component definitions can be names as well as arrays of fallback componentNames
       if (componentDefinition instanceof Array) {
         componentDefinition.some((componentName) => {
-          this.__setComponentVisible(componentName)
+          return this.__setComponentVisible(componentName)
         })
       } else {
         this.__setComponentVisible(componentDefinition)
@@ -278,7 +290,7 @@ export class NGLContext {
       // component definitions can be names as well as arrays of fallback componentNames
       if (componentDefinition instanceof Array) {
         return componentDefinition.some((componentName) => {
-          this.__focusComponent(componentName)
+          return this.__focusComponent(componentName)
         })
       } else {
         return this.__focusComponent(componentDefinition)
@@ -327,6 +339,30 @@ export class NGLContext {
     this.components = new Map()
     this.componentSet = new Set()
   }
+
+  /**
+   * Register a view listener
+   * @param {string} view name of the view
+   * @param {function} listener listener function to register
+   */
+  registerViewListener (view, listener) {
+    if (!this.viewListeners.has(view)) {
+      this.viewListeners.set(view, new Set())
+    }
+    this.viewListeners.get(view).add(listener)
+  }
+
+  /**
+   * Deregister a view listener
+   * @param {string} view name of the view
+   * @param {function} listener listener function to remove
+   */
+  deregisterViewListener (view, listener) {
+    if (!this.viewListeners.has(view)) {
+      return
+    }
+    this.viewListeners.get(view).delete(listener)
+  }
 }
 
 /**
@@ -337,6 +373,20 @@ export class CustomComponent {
     if (this.constructor === CustomComponent) {
       throw new Error('Abstract class CustomComponent cannot be instantiated')
     }
+  }
+
+  /**
+   * Corresponds to the NGL Component.visible property.
+   */
+  get visible () {
+    throw new Error('Property visible must be implemented')
+  }
+
+  /**
+   * Parents property. Custom components can have multiple parent components.
+   */
+  get parents () {
+    throw new Error('Property parent must be implemented')
   }
 
   /**

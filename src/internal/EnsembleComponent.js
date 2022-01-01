@@ -4,13 +4,38 @@ import { CustomComponent } from '@/internal/NGLContext'
  * Wrapper around an ensemble as a component
  */
 export class EnsembleComponent extends CustomComponent {
-  constructor (complexRepresentations) {
+  constructor (structureModels, representations) {
     super()
-    this.representations = complexRepresentations
-    this.parents = []
-    this.representations.forEach((representation) => {
-      this.parents.push(representation.parent)
+    this.structureModels = structureModels
+    this.structureModels.forEach((structureModel) => {
+      if (structureModel.component === undefined) {
+        throw new TypeError('Structure model does not have a component')
+      }
     })
+    this.parentList = []
+    this.representations = representations
+    this.representations.forEach((representation, index) => {
+      if (this.structureModels[index].component !== representation.parent) {
+        throw new TypeError('Representation is not of the structure model')
+      }
+      this.parentList.push(representation.parent)
+    })
+  }
+
+  /**
+   * Is the ensemble visible. If any part of the ensemble is visible this returns true.
+   * @returns {boolean}
+   */
+  get visible () {
+    return this.representations.some((representation) => { return representation.visible })
+  }
+
+  /**
+   * List of parent components of the ensemble members
+   * @returns {Array}
+   */
+  get parents () {
+    return this.parentList
   }
 
   /**

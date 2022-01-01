@@ -1,4 +1,5 @@
-import { NGLContext, CustomComponent } from '@/internal/NGLContext'
+import { NGLContext } from '@/internal/NGLContext'
+import { MockStage, MockCustomComponent, MockEnsembleComponent, MockFocusComponent } from './Mocks'
 
 describe('NGLContext', () => {
   // intentionally written in a JSON style
@@ -20,55 +21,10 @@ describe('NGLContext', () => {
     }
   }
 
-  class MockComponent extends CustomComponent {
-    // eslint-disable-next-line no-useless-constructor
-    constructor () {
-      super()
-    }
-
-    setVisibility (_value) {
-    }
-
-    autoView (_duration) {
-    }
-  }
-
-  class MockFocusComponent extends CustomComponent {
-    constructor () {
-      super()
-      this.focused = false
-    }
-
-    setVisibility (_visible) {
-    }
-
-    autoView (_duration) {
-      this.focused = true
-    }
-  }
-
-  class EnsembleComponent extends CustomComponent {
-    constructor (complexRepresentations) {
-      super()
-      this.representations = complexRepresentations
-      this.parents = []
-      this.representations.forEach((representation) => {
-        this.parents.push(representation.parent)
-      })
-    }
-
-    setVisibility (value) {
-      this.representations.forEach((representation) => representation.setVisibility(value))
-    }
-
-    autoView (duration) {
-    }
-  }
-
   it('renders a registered component', () => {
-    const nglContext = new NGLContext({}, staticViewDefinition)
-    const firstComponent = new MockComponent()
-    const secondComponent = new MockComponent()
+    const nglContext = new NGLContext(new MockStage(), staticViewDefinition)
+    const firstComponent = new MockCustomComponent()
+    const secondComponent = new MockCustomComponent()
     nglContext.registerComponent('protein', firstComponent)
     expect(nglContext.components.get('protein')).toBeDefined()
     nglContext.switchView('proteinView')
@@ -91,11 +47,11 @@ describe('NGLContext', () => {
   })
 
   it('rejects invalid components', () => {
-    const nglContext = new NGLContext({})
+    const nglContext = new NGLContext(new MockStage())
     expect(() => {
       nglContext.registerComponent('component', {})
     }).toThrow(new Error('Tried to register invalid component'))
-    const structure = new MockComponent()
+    const structure = new MockCustomComponent()
     // fake a structure component
     structure.structure = {}
     expect(() => {
@@ -104,9 +60,9 @@ describe('NGLContext', () => {
   })
 
   it('clears components', () => {
-    const nglContext = new NGLContext({})
-    const firstComponent = new MockComponent()
-    const secondComponent = new MockComponent()
+    const nglContext = new NGLContext(new MockStage())
+    const firstComponent = new MockCustomComponent()
+    const secondComponent = new MockCustomComponent()
     nglContext.registerComponent('protein', firstComponent)
     nglContext.registerComponent('other', secondComponent)
     nglContext.clearComponents()
@@ -115,18 +71,18 @@ describe('NGLContext', () => {
   })
 
   it('renders a fallback component', () => {
-    const nglContext = new NGLContext({}, staticViewDefinition)
-    const mockComponent = new MockComponent()
+    const nglContext = new NGLContext(new MockStage(), staticViewDefinition)
+    const mockComponent = new MockCustomComponent()
     nglContext.registerComponent('otherProtein', mockComponent)
     nglContext.switchView('complexView')
     expect(mockComponent.visible)
   })
 
   it('renders independent views', () => {
-    const nglContext = new NGLContext({}, staticViewDefinition)
-    const proteinComponent = new MockComponent()
+    const nglContext = new NGLContext(new MockStage(), staticViewDefinition)
+    const proteinComponent = new MockCustomComponent()
     nglContext.registerComponent('protein', proteinComponent)
-    const ligandComponent = new MockComponent()
+    const ligandComponent = new MockCustomComponent()
     nglContext.registerComponent('ligand', ligandComponent)
     expect(nglContext.currentView).toBeUndefined()
     nglContext.switchView('ligandView')
@@ -141,7 +97,7 @@ describe('NGLContext', () => {
   })
 
   it('initializes a static view definition', () => {
-    const nglContext = new NGLContext({}, staticViewDefinition)
+    const nglContext = new NGLContext(new MockStage(), staticViewDefinition)
     expect(nglContext.stage)
     expect(nglContext.views)
     expect(nglContext.views.get('complexView'))
@@ -151,20 +107,20 @@ describe('NGLContext', () => {
   it('rejects an invalid static view', () => {
     expect(() => {
       // eslint-disable-next-line no-new
-      new NGLContext({}, { view: 'invalid' })
+      new NGLContext(new MockStage(), { view: 'invalid' })
     }).toThrow(new Error('Invalid view definition: view'))
     expect(() => {
       // eslint-disable-next-line no-new
-      new NGLContext({}, { view: {} })
+      new NGLContext(new MockStage(), { view: {} })
     }).toThrow(new Error('Missing or invalid view components for: view'))
     expect(() => {
       // eslint-disable-next-line no-new
-      new NGLContext({}, { view: { visible: [] } })
+      new NGLContext(new MockStage(), { view: { visible: [] } })
     }).toThrow(new Error('Invalid focus components for: view'))
   })
 
   it('builds a view definition dynamically', () => {
-    const nglContext = new NGLContext({})
+    const nglContext = new NGLContext(new MockStage())
     nglContext
       .addView('ligandView')
       .addViewComponent('ligandView', 'ligand')
@@ -184,16 +140,16 @@ describe('NGLContext', () => {
   })
 
   it('renders custom components', () => {
-    const nglContext = new NGLContext({}, {
+    const nglContext = new NGLContext(new MockStage(), {
       ensembleView: {
         visible: new Set(['ensemble']),
         focus: ['ensemble']
       }
     })
-    const mockComponent = new MockComponent()
-    const otherMockComponent = new MockComponent()
+    const mockComponent = new MockCustomComponent()
+    const otherMockComponent = new MockCustomComponent()
     const ensembleComponent =
-      new EnsembleComponent([mockComponent, otherMockComponent])
+      new MockEnsembleComponent([mockComponent, otherMockComponent])
     nglContext.registerComponent('ensemble', ensembleComponent)
     nglContext.switchView('ensembleView')
     expect(mockComponent.visible)
@@ -201,7 +157,7 @@ describe('NGLContext', () => {
   })
 
   it('focuses components', () => {
-    const nglContext = new NGLContext({}, {
+    const nglContext = new NGLContext(new MockStage(), {
       focusView: {
         visible: new Set(['focusComponent']),
         focus: ['focusComponent']
@@ -211,5 +167,15 @@ describe('NGLContext', () => {
     nglContext.registerComponent('focusComponent', focusComponent)
     nglContext.switchView('focusView')
     expect(focusComponent.focused)
+  })
+
+  it('registers and deregisters view listeners', () => {
+    const nglContext = new NGLContext(new MockStage())
+    const listener = () => {}
+    nglContext.registerViewListener('test', listener)
+    expect(nglContext.viewListeners.has('test'))
+    expect(nglContext.viewListeners.get('test').has(listener()))
+    nglContext.deregisterViewListener('test', listener)
+    expect(nglContext.viewListeners.get('test').size).toEqual(0)
   })
 })
