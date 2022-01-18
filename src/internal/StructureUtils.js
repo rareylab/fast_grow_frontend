@@ -144,4 +144,32 @@ export class StructureUtils {
     })
     return [activeAtomSet, activeWaterSet]
   }
+
+  static structureContainsAtom (structure, atom) {
+    const retrievedAtom = structure.atomMap.get(atom.index)
+    if (!retrievedAtom) {
+      return false
+    }
+    return retrievedAtom.atomname === atom.atomname
+  }
+
+  static structureContainsBond (structure, bond) {
+    return StructureUtils.structureContainsAtom(structure, bond.atom1) &&
+      StructureUtils.structureContainsAtom(structure, bond.atom2)
+  }
+
+  /**
+   * Check if the atoms of a bond are in the same ring.
+   * @param bond
+   * @return {boolean} in the same ring
+   */
+  static inSameRing (bond) {
+    if (!bond.atom1.isRing() || !bond.atom2.isRing()) {
+      return false
+    }
+    const rings = bond.atom1.residueType.getRings().rings
+    return rings.some(function (ring) {
+      return ring.includes(bond.atom1.index) && ring.includes(bond.atom2.index)
+    })
+  }
 }

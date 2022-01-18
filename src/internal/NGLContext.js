@@ -65,7 +65,7 @@ export class NGLContext {
           !(viewDefinition[view].visible instanceof Set))) {
         throw new TypeError(`Missing or invalid view components for: ${view}`)
       }
-      // visible components must exist and be an array
+      // focus components must exist and be an array
       if (!viewDefinition[view].focus ||
         !(viewDefinition[view].focus instanceof Array)) {
         throw new TypeError(`Invalid focus components for: ${view}`)
@@ -214,12 +214,32 @@ export class NGLContext {
    */
   replaceComponent (name, component) {
     this.__validateComponent(component)
+    if (this.componentSet.has(component)) {
+      throw new Error('Tried to re-register an already registered component')
+    }
     if (!this.components.has(name)) {
       throw new Error('Tried to replace non-existent component')
     }
     const formerComponent = this.components.get(name)
     formerComponent.setVisibility(false)
     this.componentSet.delete(formerComponent)
+    this.components.set(name, component)
+    this.componentSet.add(component)
+  }
+
+  /**
+   * Replace or register a component.
+   * Use if you don't care whether the component existed before.
+   * @param {string} name name to register component under
+   * @param {object} component new component to register or to replace the old one
+   */
+  registerReplaceComponent (name, component) {
+    this.__validateComponent(component)
+    if (this.components.has(name)) {
+      const formerComponent = this.components.get(name)
+      formerComponent.setVisibility(false)
+      this.componentSet.delete(formerComponent)
+    }
     this.components.set(name, component)
     this.componentSet.add(component)
   }

@@ -9,7 +9,7 @@ export class MockStage {
   }
 
   loadFile () {
-    return new Promise((resolve) => { resolve(new MockComponent()) })
+    return new Promise((resolve) => { setTimeout(() => resolve(new MockComponent()), 100) })
   }
 }
 

@@ -3,7 +3,7 @@ import LigandChoice from '@/components/LigandChoice'
 
 describe('LigandChoice', () => {
   it('applies a clicked row', async () => {
-    const ligands = [{ name: 'a' }, { name: 'b' }, { name: 'c' }]
+    const ligands = [{ name: 'a', id: 1 }, { name: 'b', id: 2 }, { name: 'c', id: 3 }]
     const wrapper = shallowMount(LigandChoice, {
       props: { ligands: ligands }
     })
@@ -11,17 +11,19 @@ describe('LigandChoice', () => {
     await rows[0].trigger('click')
     expect(rows[0].wrapperElement.classList.contains('highlight'))
     expect(wrapper.emitted().ligandChosen).toBeDefined()
+    expect(wrapper.emitted().ligandChosen[0][0]).toEqual('1')
   })
 
   it('applies a clicked ligand', async () => {
-    const ligands = [{ name: 'a' }, { name: 'b' }, { name: 'c' }]
+    const ligands = [{ name: 'a', id: 1 }, { name: 'b', id: 2 }, { name: 'c', id: 3 }]
     const wrapper = shallowMount(LigandChoice, {
       props: { ligands: ligands }
     })
     const name = 'a'
     wrapper.vm.ligandClicked({ component: { structure: { name: name } } })
     const highlightedRow = wrapper.find('tr.highlighted')
-    expect(highlightedRow.wrapperElement.children[0].textContent).toEqual(name)
+    expect(highlightedRow.wrapperElement.children[0].textContent).toEqual('1')
     expect(wrapper.emitted().ligandChosen).toBeDefined()
+    expect(wrapper.emitted().ligandChosen[0][0]).toEqual('1')
   })
 })
