@@ -1,5 +1,6 @@
+import { expect } from 'chai'
 import { StructureUploadHandler } from '@/internal/StructureUploadHandler'
-import { MockStage } from './Mocks'
+import { MockStage } from '../utils/Mocks'
 
 describe('StructureHandler', () => {
   class MockStructure {
@@ -17,9 +18,9 @@ describe('StructureHandler', () => {
     }
     const [complexRepresentations, ligandChoiceRepresentations, ligandComponents] =
       await StructureUploadHandler.loadEnsemble(ensemble, new MockStage())
-    expect(complexRepresentations.length).toEqual(3)
-    expect(ligandChoiceRepresentations.length).toEqual(2)
-    expect(ligandComponents.length).toEqual(2)
+    expect(complexRepresentations.length).to.equal(3)
+    expect(ligandChoiceRepresentations.length).to.equal(2)
+    expect(ligandComponents.length).to.equal(2)
     ensemble.complexes.forEach((complex) => {
       expect(complex.component)
     })
@@ -38,7 +39,7 @@ describe('StructureHandler', () => {
     const [complexRepresentations, , ligandComponents] =
       await StructureUploadHandler.loadEnsemble(ensemble, new MockStage())
     structureUploadHandler.cacheChoiceComponents(ensemble, complexRepresentations, ligandComponents)
-    expect(componentCache.size).toEqual(ensemble.complexes.length + ensemble.ligands.length)
+    expect(componentCache.size).to.equal(ensemble.complexes.length + ensemble.ligands.length)
     ensemble.complexes.forEach((complex) => {
       expect(componentCache.has('complex_' + complex.id))
     })

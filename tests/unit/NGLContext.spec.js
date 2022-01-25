@@ -1,5 +1,6 @@
+import { expect } from 'chai'
 import { NGLContext } from '@/internal/NGLContext'
-import { MockStage, MockCustomComponent, MockEnsembleComponent, MockFocusComponent } from './Mocks'
+import { MockStage, MockCustomComponent, MockEnsembleComponent, MockFocusComponent } from '../utils/Mocks'
 
 describe('NGLContext', () => {
   // intentionally written in a JSON style
@@ -26,22 +27,22 @@ describe('NGLContext', () => {
     const firstComponent = new MockCustomComponent()
     const secondComponent = new MockCustomComponent()
     nglContext.registerComponent('protein', firstComponent)
-    expect(nglContext.components.get('protein')).toBeDefined()
+    expect(nglContext.components.get('protein') !== undefined)
     nglContext.switchView('proteinView')
-    expect(nglContext.currentView).toBe('proteinView')
+    expect(nglContext.currentView).to.equal('proteinView')
     expect(firstComponent.visible)
     expect(nglContext.components.get('protein').visible)
 
     // components can only be registered once under one name
     expect(() => {
       nglContext.registerComponent('protein', firstComponent)
-    }).toThrow(new Error('Tried to re-register an already registered component'))
+    }).to.throw(Error, 'Tried to re-register an already registered component')
     expect(() => {
       nglContext.registerComponent('otherProtein', firstComponent)
-    }).toThrow(new Error('Tried to re-register an already registered component'))
+    }).to.throw(Error, 'Tried to re-register an already registered component')
     expect(() => {
       nglContext.replaceComponent('otherProtein', secondComponent)
-    }).toThrow(new Error('Tried to replace non-existent component'))
+    }).to.throw(Error, 'Tried to replace non-existent component')
     nglContext.replaceComponent('protein', secondComponent)
     nglContext.deregisterComponent('protein')
   })
@@ -50,13 +51,13 @@ describe('NGLContext', () => {
     const nglContext = new NGLContext(new MockStage())
     expect(() => {
       nglContext.registerComponent('component', {})
-    }).toThrow(new Error('Tried to register invalid component'))
+    }).to.throw(Error, 'Tried to register invalid component')
     const structure = new MockCustomComponent()
     // fake a structure component
     structure.structure = {}
     expect(() => {
       nglContext.registerComponent('component', structure)
-    }).toThrow(new Error('Tried to add structure component instead of representation'))
+    }).to.throw(Error, 'Tried to add structure component instead of representation')
   })
 
   it('clears components', () => {
@@ -66,8 +67,8 @@ describe('NGLContext', () => {
     nglContext.registerComponent('protein', firstComponent)
     nglContext.registerComponent('other', secondComponent)
     nglContext.clearComponents()
-    expect(nglContext.components.size).toEqual(0)
-    expect(nglContext.componentSet.size).toEqual(0)
+    expect(nglContext.components.size).to.equal(0)
+    expect(nglContext.componentSet.size).to.equal(0)
   })
 
   it('renders a fallback component', () => {
@@ -84,7 +85,7 @@ describe('NGLContext', () => {
     nglContext.registerComponent('protein', proteinComponent)
     const ligandComponent = new MockCustomComponent()
     nglContext.registerComponent('ligand', ligandComponent)
-    expect(nglContext.currentView).toBeUndefined()
+    expect(nglContext.currentView === undefined)
     nglContext.switchView('ligandView')
     expect(ligandComponent.visible)
     expect(!proteinComponent.visible)
@@ -101,22 +102,22 @@ describe('NGLContext', () => {
     expect(nglContext.stage)
     expect(nglContext.views)
     expect(nglContext.views.get('complexView'))
-    expect(nglContext.getViewDefinition()).toEqual(staticViewDefinition)
+    expect(nglContext.getViewDefinition()).to.eql(staticViewDefinition)
   })
 
   it('rejects an invalid static view', () => {
     expect(() => {
       // eslint-disable-next-line no-new
       new NGLContext(new MockStage(), { view: 'invalid' })
-    }).toThrow(new Error('Invalid view definition: view'))
+    }).to.throw(Error, 'Invalid view definition: view')
     expect(() => {
       // eslint-disable-next-line no-new
       new NGLContext(new MockStage(), { view: {} })
-    }).toThrow(new Error('Missing or invalid view components for: view'))
+    }).to.throw(Error, 'Missing or invalid view components for: view')
     expect(() => {
       // eslint-disable-next-line no-new
       new NGLContext(new MockStage(), { view: { visible: [] } })
-    }).toThrow(new Error('Invalid focus components for: view'))
+    }).to.throw(Error, 'Invalid focus components for: view')
   })
 
   it('builds a view definition dynamically', () => {
@@ -136,7 +137,7 @@ describe('NGLContext', () => {
       .removeView('invalidView')
       .addViewComponent('complexView', 'invalidComponent')
       .removeViewComponent('complexView', 'invalidComponent')
-    expect(nglContext.getViewDefinition()).toEqual(staticViewDefinition)
+    expect(nglContext.getViewDefinition()).to.eql(staticViewDefinition)
   })
 
   it('renders custom components', () => {
@@ -176,6 +177,6 @@ describe('NGLContext', () => {
     expect(nglContext.viewListeners.has('test'))
     expect(nglContext.viewListeners.get('test').has(listener()))
     nglContext.deregisterViewListener('test', listener)
-    expect(nglContext.viewListeners.get('test').size).toEqual(0)
+    expect(nglContext.viewListeners.get('test').size).to.equal(0)
   })
 })

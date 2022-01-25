@@ -6,6 +6,8 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "test:unit": "vue-cli-service test:unit",
+    "test:browser": "BROWSERTEST=true npm run build && PYTHONPATH='.' python tests/browser/run.py",
+    "test:e2e": "python -m unittest tests.e2e",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {

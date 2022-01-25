@@ -1,3 +1,4 @@
+import { expect } from 'chai'
 import { shallowMount } from '@vue/test-utils'
 import StructureUpload from '@/components/StructureUpload'
 
@@ -7,9 +8,9 @@ describe('StructureUpload', () => {
     await wrapper.setData({ formError: 'test error' })
     const divs = wrapper.findAll('div')
     // error div has appeared
-    expect(divs.length).toEqual(3)
+    expect(divs.length).to.equal(3)
     // is displaying the test error
-    expect(divs[0].text()).toEqual('test error')
+    expect(divs[0].text()).to.equal('test error')
   })
 
   it('disables submit if a submission error occurred', () => {
@@ -18,9 +19,9 @@ describe('StructureUpload', () => {
     })
     const divs = wrapper.findAll('div')
     // error div has appeared
-    expect(divs.length).toEqual(3)
+    expect(divs.length).to.equal(3)
     // is displaying the test error
-    expect(divs[0].text()).toEqual('test error')
+    expect(divs[0].text()).to.equal('test error')
   })
 
   it('disables submit if currently polling', () => {
@@ -28,8 +29,8 @@ describe('StructureUpload', () => {
       props: { pollingServer: true }
     })
     const divs = wrapper.findAll('span')
-    expect(divs.length).toEqual(2)
-    expect(divs[0].classes()).toContain('spinner-grow')
-    expect(divs[1].text()).toEqual('Loading...')
+    expect(divs.length).to.equal(2)
+    expect(divs[0].classes()).to.contain('spinner-grow')
+    expect(divs[1].text()).to.equal('Loading...')
   })
 })

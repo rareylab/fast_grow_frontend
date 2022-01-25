@@ -162,7 +162,7 @@ export default {
         await this.structureUploadHandler.load(ensemble)
         if (this.ligand && this.pocket) {
           // TODO handle switch to bond choice
-          this.nglContext.render()
+          this.changeTab('ligands-tab-trigger')
         } else if (this.ligand) {
           // TODO handle switch to pocket choice
           this.changeTab('ligands-tab-trigger')
