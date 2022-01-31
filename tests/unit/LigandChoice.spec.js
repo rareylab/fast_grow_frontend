@@ -20,7 +20,8 @@ describe('LigandChoice', () => {
     const rows = wrapper.findAll('td')
     await rows[0].trigger('click')
     expect(rows[0].wrapperElement.classList.contains('highlight'))
-    expect(wrapper.emitted().ligandChosen !== undefined)
+    // eslint-disable-next-line no-unused-expressions
+    expect(wrapper.emitted().ligandChosen).to.not.be.undefined
     expect(wrapper.emitted().ligandChosen[0][0]).to.equal('1')
   })
 
@@ -42,7 +43,8 @@ describe('LigandChoice', () => {
     wrapper.vm.ligandClicked({ component: { structure: { name: name } } })
     const highlightedRow = wrapper.find('tr.highlighted')
     expect(highlightedRow.wrapperElement.children[0].textContent).to.equal('1')
-    expect(wrapper.emitted().ligandChosen !== undefined)
+    // eslint-disable-next-line no-unused-expressions
+    expect(wrapper.emitted().ligandChosen).to.not.be.undefined
     expect(wrapper.emitted().ligandChosen[0][0]).to.equal('1')
   })
 })

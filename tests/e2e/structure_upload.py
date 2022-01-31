@@ -96,10 +96,10 @@ class StructureUploadTests(unittest.TestCase):
         # TODO the tab that this should switch to doesn't exist yet
         try:
             WebDriverWait(self.driver, SERVER_TIMEOUT).until(
-                element_has_css_class((By.ID, 'ligands-tab-trigger'), 'active'))
+                element_has_css_class((By.ID, 'pockets-tab-trigger'), 'active'))
         except TimeoutException:
             raise AssertionError('Failure in structure upload') from None
-        ligands_tab = self.driver.find_element(By.ID, 'ligands-tab')
-        ligand_rows = ligands_tab.find_elements(By.TAG_NAME, 'tr')
-        # 2 ligands one header row
-        self.assertEqual(len(ligand_rows) - 1, 1)
+        pockets_tab = self.driver.find_element(By.ID, 'pockets-tab')
+        pocket_rows = pockets_tab.find_elements(By.TAG_NAME, 'tr')
+        # 3 pockets one header row
+        self.assertEqual(len(pocket_rows) - 1, 3)

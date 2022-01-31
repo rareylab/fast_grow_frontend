@@ -6,7 +6,7 @@ const browserTestPath = './tests/browser'
 module.exports = {
   // configure alternative build target for browser based unit tests
   outputDir: process.env.BROWSERTEST === 'true' ? path.join(browserTestPath, 'dist') : 'dist',
-  filenameHashing: process.env.BROWSERTEST === 'true' ? false : true,
+  filenameHashing: process.env.BROWSERTEST !== 'true',
   configureWebpack: config => {
     if (process.env.BROWSERTEST === 'true') {
       const testFiles = []

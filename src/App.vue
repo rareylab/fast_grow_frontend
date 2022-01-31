@@ -33,6 +33,19 @@
               Ligands
             </button>
           </li>
+          <li class="nav-item" role="presentation">
+            <button
+                id="pockets-tab-trigger"
+                class="nav-link"
+                data-bs-toggle="tab"
+                data-bs-target="#pockets-tab"
+                type="button"
+                role="tab"
+                aria-controls="pockets-tab"
+            >
+              Pockets
+            </button>
+          </li>
         </ul>
         <div class="tab-content flex-grow-1" id="tab-content">
           <div
@@ -61,6 +74,18 @@
                 :view="'ligands-tab'"
             ></ligand-choice>
           </div>
+          <div
+              class="tab-pane fade h-100"
+              id="pockets-tab"
+              role="tabpanel"
+              aria-labelledby="pockets-tab"
+          >
+            <pocket-choice
+                @pocketChosen="this.pocketChosen"
+                :complexes="this.complexes"
+                :view="'pockets-tab'"
+            ></pocket-choice>
+          </div>
         </div>
       </div>
     </div>
@@ -77,6 +102,8 @@ import { Utils } from '@/internal/Utils'
 import StructureUpload from '@/components/StructureUpload'
 import LigandChoice from '@/components/LigandChoice'
 import { StructureUploadHandler } from '@/internal/StructureUploadHandler'
+import PocketChoice from '@/components/PocketChoice'
+import { StructureUtils } from '@/internal/StructureUtils'
 
 const viewDefinition = {
   'structure-tab': {
@@ -87,12 +114,17 @@ const viewDefinition = {
     // both ligands an ligand are visible so both the choices and the chosen are visible
     visible: ['ensemble', 'pocket', 'ligands', 'ligand'],
     focus: ['ligand', 'ligands', 'protein']
+  },
+  'pockets-tab': {
+    visible: ['ensemble', 'pocket', 'ligand'],
+    focus: ['ligand', 'protein']
   }
 }
 
 export default {
   name: 'FastGrow',
   components: {
+    PocketChoice,
     LigandChoice,
     StructureUpload
   },
@@ -104,6 +136,7 @@ export default {
       // this state is duplicated from the nglContext because the Vue proxy breaks NGL components
       ligands: [],
       ligand: undefined,
+      complexes: [],
       pocket: undefined
     }
   },
@@ -164,8 +197,7 @@ export default {
           // TODO handle switch to bond choice
           this.changeTab('ligands-tab-trigger')
         } else if (this.ligand) {
-          // TODO handle switch to pocket choice
-          this.changeTab('ligands-tab-trigger')
+          this.changeTab('pockets-tab-trigger')
         } else {
           this.changeTab('ligands-tab-trigger')
         }
@@ -175,10 +207,26 @@ export default {
         this.pollingServer = false
       }
     },
-    async ligandChosen (id) {
-      const ligandComponent = this.componentCache.get('ligand_' + id)
+    async ligandChosen (ligandId) {
+      const ligandComponent = this.componentCache.get('ligand_' + ligandId)
       this.ligand = ligandComponent.structureModel
       this.nglContext.registerReplaceComponent('ligand', ligandComponent)
+      this.nglContext.render()
+    },
+    async pocketChosen (complexId) {
+      const complexComponent = this.componentCache.get('complex_' + complexId)
+      const complexRepresentations = complexComponent.structureModel.component.reprList
+      complexRepresentations.forEach((representation) => {
+        if (representation.name === 'pocketLicorice') {
+          complexComponent.structureModel.component.removeRepresentation(representation)
+        }
+      })
+      const pocketRepresentation = StructureUtils.addPocket(
+        this.ligand.component,
+        complexComponent.structureModel.component
+      )
+      this.pocket = pocketRepresentation
+      this.nglContext.registerReplaceComponent('pocket', pocketRepresentation)
       this.nglContext.render()
     }
   },
