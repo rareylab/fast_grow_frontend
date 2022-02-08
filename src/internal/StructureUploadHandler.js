@@ -3,9 +3,9 @@ import { StructureUtils } from '@/internal/StructureUtils'
 import { StructureModelComponent } from '@/internal/StructureModelComponent'
 
 export class StructureUploadHandler {
-  constructor (data, nglContext, componentCache) {
-    this.data = data
+  constructor (nglContext, data, componentCache) {
     this.nglContext = nglContext
+    this.data = data
     this.componentCache = componentCache
   }
 
@@ -42,8 +42,8 @@ export class StructureUploadHandler {
    * @param {object} ensemble
    */
   async load (ensemble) {
-    const catFound = new CustomEvent('remove', { derivedFrom: 'ligands' })
-    window.dispatchEvent(catFound)
+    // const catFound = new CustomEvent('remove', { derivedFrom: 'ligands' })
+    // window.dispatchEvent(catFound)
 
     const [complexRepresentations, ligandChoiceRepresentations, ligandComponents] =
       await StructureUploadHandler.loadEnsemble(ensemble, this.nglContext.stage)
@@ -141,11 +141,15 @@ export class StructureUploadHandler {
       const structurePromise = StructureUtils.addStructure(stage, ensemble.ligands[i])
         .then((component) => {
           ensemble.ligands[i].component = component
-          const ligandRepr = component.addRepresentation('licorice', { visible: false })
+          const ligandRepr = component.addRepresentation('licorice', {
+            visible: false,
+            multipleBond: true
+          })
           // when choosing ligands the choices should by translucent
           // to differentiate them from chosen ligands
           const choiceRepr = component.addRepresentation('licorice', {
             visible: false,
+            multipleBond: true,
             opacity: 0.5
           })
           ligandChoiceRepresentations.push(choiceRepr)

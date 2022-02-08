@@ -17,11 +17,11 @@ describe('StructureUpload', () => {
     const wrapper = shallowMount(StructureUpload, {
       props: { submitError: 'test error' }
     })
-    const divs = wrapper.findAll('div')
-    // error div has appeared
-    expect(divs.length).to.equal(3)
+    const errorElement = wrapper.find('.text-danger')
+    // eslint-disable-next-line no-unused-expressions
+    expect(errorElement).to.not.be.undefined
     // is displaying the test error
-    expect(divs[0].text()).to.equal('test error')
+    expect(errorElement.text()).to.equal('test error')
   })
 
   it('disables submit if currently polling', () => {

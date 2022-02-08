@@ -146,6 +146,9 @@ export class StructureUtils {
   }
 
   static structureContainsAtom (structure, atom) {
+    if (atom.structure.name !== structure.name) {
+      return false
+    }
     const retrievedAtom = structure.atomMap.get(atom.index)
     if (!retrievedAtom) {
       return false

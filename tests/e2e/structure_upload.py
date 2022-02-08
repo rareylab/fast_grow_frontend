@@ -52,10 +52,9 @@ class StructureUploadTests(unittest.TestCase):
         ligand_file_field.send_keys(os.path.join(TEST_FILES, '7A4R_1.sdf'))
         upload_button = self.driver.find_element(By.ID, 'structure-upload-button')
         upload_button.click()
-        # TODO the tab that this should switch to doesn't exist yet
         try:
             WebDriverWait(self.driver, SERVER_TIMEOUT).until(
-                element_has_css_class((By.ID, 'ligands-tab-trigger'), 'active'))
+                element_has_css_class((By.ID, 'cut-tab-trigger'), 'active'))
         except TimeoutException:
             raise RuntimeError('Failure in structure upload') from None
         ligands_tab = self.driver.find_element(By.ID, 'ligands-tab')

@@ -37,3 +37,30 @@ class element_stays_the_same:
 
         self.element = element
         return False
+
+class element_not_disabled:
+    """Check an element is not disabled
+
+    :param locator: used to find the element
+    :return: True if element is not disabled
+    """
+
+    def __init__(self, locator):
+            self.locator = locator
+
+    def __call__(self, driver):
+        element = driver.find_element(*self.locator)
+        return element.get_attribute('disabled') is not None
+
+class js_returns_true:
+    """Check JS returns true
+
+    :param script: JS to execute
+    :return: True if JS returns true
+    """
+
+    def __init__(self, script):
+            self.script = script
+
+    def __call__(self, driver):
+        return driver.execute_script(self.script)
