@@ -6,45 +6,55 @@
       </div>
       <div class="col-5 h-100 d-flex flex-column">
         <ul class="nav nav-tabs" role="tablist">
-          <li class="nav-item" role="presentation">
-            <button
-                id="structure-tab-trigger"
-                class="nav-link active"
-                data-bs-toggle="tab"
-                data-bs-target="#structure-tab"
-                type="button"
-                role="tab"
-                aria-controls="structure-tab"
-                aria-selected="true"
+          <li class="nav-item dropdown">
+            <a
+                class="nav-link dropdown-toggle"
+                data-bs-toggle="dropdown"
+                href="#"
+                role="button"
+                aria-expanded="false"
             >
               Structure
-            </button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button
-                id="ligands-tab-trigger"
-                class="nav-link"
-                data-bs-toggle="tab"
-                data-bs-target="#ligands-tab"
-                type="button"
-                role="tab"
-                aria-controls="ligands-tab"
-            >
-              Ligands
-            </button>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button
-                id="pockets-tab-trigger"
-                class="nav-link"
-                data-bs-toggle="tab"
-                data-bs-target="#pockets-tab"
-                type="button"
-                role="tab"
-                aria-controls="pockets-tab"
-            >
-              Pockets
-            </button>
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a
+                    class="dropdown-item"
+                    href="#"
+                    id="upload-tab-trigger"
+                    data-bs-toggle="tab"
+                    data-bs-target="#upload-tab"
+                    aria-controls="upload-tab"
+                    aria-selected="true"
+                >
+                  Upload
+                </a>
+              </li>
+              <li>
+                <a
+                    class="dropdown-item"
+                    href="#"
+                    id="ligands-tab-trigger"
+                    data-bs-toggle="tab"
+                    data-bs-target="#ligands-tab"
+                    aria-controls="ligands-tab"
+                >
+                  Ligands
+                </a>
+              </li>
+              <li>
+                <a
+                    class="dropdown-item"
+                    href="#"
+                    id="pockets-tab-trigger"
+                    data-bs-toggle="tab"
+                    data-bs-target="#pockets-tab"
+                    aria-controls="pockets-tab"
+                >
+                  Pockets
+                </a>
+              </li>
+            </ul>
           </li>
           <li class="nav-item" role="presentation">
             <button
@@ -59,13 +69,38 @@
               Cut
             </button>
           </li>
+          <li class="nav-item dropdown">
+            <a
+                class="nav-link dropdown-toggle"
+                data-bs-toggle="dropdown"
+                href="#"
+                role="button"
+                aria-expanded="false"
+            >
+              Interactions
+            </a>
+            <ul class="dropdown-menu">
+              <li>
+                <a
+                    class="dropdown-item"
+                    href="#"
+                    id="ligand-interactions-tab-trigger"
+                    data-bs-toggle="tab"
+                    data-bs-target="#ligand-interactions-tab"
+                    aria-controls="ligand-interactions-tab"
+                >
+                  Ligand
+                </a>
+              </li>
+            </ul>
+          </li>
         </ul>
         <div class="tab-content flex-grow-1" id="tab-content">
           <div
               class="tab-pane fade show active"
-              id="structure-tab"
+              id="upload-tab"
               role="tabpanel"
-              aria-labelledby="structure-tab"
+              aria-labelledby="upload-tab"
           >
             <structure-upload
                 @submit="this.structureUpload"
@@ -102,7 +137,7 @@
               class="tab-pane fade h-100"
               id="cut-tab"
               role="tabpanel"
-              aria-labelledby="pockets-tab"
+              aria-labelledby="cut-tab"
           >
             <cut
                 @register="this.registerListener"
@@ -115,6 +150,14 @@
                 :ligand="this.ligand"
                 ref="clip"
             ></cut>
+          </div>
+          <div
+              class="tab-pane fade h-100"
+              id="ligand-interactions-tab"
+              role="tabpanel"
+              aria-labelledby="ligand-interactions-tab"
+          >
+            <h2>Ligand Interactions</h2>
           </div>
         </div>
       </div>
@@ -139,7 +182,7 @@ import PocketChoice from '@/components/PocketChoice'
 import Cut from '@/components/Cut'
 
 const viewDefinition = {
-  'structure-tab': {
+  'upload-tab': {
     visible: ['ensemble', 'pocket', ['ligand', 'ligands'], 'bondMarker'],
     focus: ['ligand', 'ligands', 'ensemble']
   },
@@ -327,7 +370,7 @@ export default {
     this.stage = new NGL.Stage('viewport')
     this.nglContext = new NGLContext(this.stage, viewDefinition)
     this.nglContext.debug = true
-    this.nglContext.switchView('structure-tab')
+    this.nglContext.switchView('upload-tab')
     this.componentCache = new Map()
 
     // handlers
