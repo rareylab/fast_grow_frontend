@@ -5,6 +5,7 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "test:all": "npm run test:unit && npm run test:browser && npm run test:e2e",
     "test:unit": "vue-cli-service test:unit",
     "test:browser": "BROWSERTEST=true npm run build && PYTHONPATH='.' python tests/browser/run.py",
     "test:e2e": "python -m unittest tests.e2e",
