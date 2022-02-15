@@ -1,6 +1,6 @@
-import { EnsembleComponent } from '@/internal/EnsembleComponent'
-import { StructureUtils } from '@/internal/StructureUtils'
-import { StructureModelComponent } from '@/internal/StructureModelComponent'
+import { EnsembleComponent } from '@/nglComponents/EnsembleComponent'
+import { StructureUtils } from '@/utils/StructureUtils'
+import { StructureModelComponent } from '@/nglComponents/StructureModelComponent'
 
 export class StructureUploadHandler {
   constructor (nglContext, data, componentCache) {

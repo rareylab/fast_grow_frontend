@@ -1,5 +1,5 @@
-import { StructureUtils } from '@/internal/StructureUtils'
-import { StructureModelComponent } from '@/internal/StructureModelComponent'
+import { StructureUtils } from '@/utils/StructureUtils'
+import { StructureModelComponent } from '@/nglComponents/StructureModelComponent'
 
 export class CutHandler {
   constructor (nglContext, data, componentCache) {

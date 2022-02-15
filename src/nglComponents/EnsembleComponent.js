@@ -1,4 +1,4 @@
-import { CustomComponent } from '@/internal/NGLContext'
+import { CustomComponent } from '@/NGLContext'
 
 /**
  * Wrapper around an ensemble as a component

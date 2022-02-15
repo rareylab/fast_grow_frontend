@@ -60,7 +60,7 @@
 </template>
 
 <script>
-import { StructureUtils } from '@/internal/StructureUtils'
+import { StructureUtils } from '@/utils/StructureUtils'
 
 export default {
   name: 'Cut',

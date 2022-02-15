@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { NGLContext } from '@/internal/NGLContext'
+import { NGLContext } from '@/NGLContext'
 import { MockStage, MockCustomComponent, MockEnsembleComponent, MockFocusComponent } from '../utils/Mocks'
 
 describe('NGLContext', () => {

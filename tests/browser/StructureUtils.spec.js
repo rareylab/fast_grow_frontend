@@ -1,7 +1,7 @@
 /* eslint-disable no-undef */
 import { expect } from 'chai'
 import * as NGL from 'ngl'
-import { StructureUtils } from '@/internal/StructureUtils'
+import { StructureUtils } from '@/utils/StructureUtils'
 import { TestData } from '../test_files/TestData'
 
 describe('StructureUtils', () => {

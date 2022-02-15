@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { StructureUploadHandler } from '@/internal/StructureUploadHandler'
+import { StructureUploadHandler } from '@/handlers/StructureUploadHandler'
 import { MockStage } from '../utils/Mocks'
 
 describe('StructureHandler', () => {

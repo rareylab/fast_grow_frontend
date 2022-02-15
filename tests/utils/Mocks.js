@@ -1,4 +1,4 @@
-import { CustomComponent } from '@/internal/NGLContext'
+import { CustomComponent } from '@/NGLContext'
 
 export class MockStage {
   // eslint-disable-next-line no-useless-constructor
@@ -6,10 +6,23 @@ export class MockStage {
     this.signals = {
       clicked: new Set()
     }
+    this.components = []
   }
 
   loadFile () {
-    return new Promise((resolve) => { setTimeout(() => resolve(new MockComponent()), 100) })
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const component = new MockComponent()
+        this.components.push(component)
+        resolve(component)
+      }, 100)
+    })
+  }
+
+  addComponentFromObject (_object) {
+    const component = new MockComponent()
+    this.components.push(component)
+    return component
   }
 }
 

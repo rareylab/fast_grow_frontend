@@ -17,9 +17,11 @@ describe('LigandChoice', () => {
     const wrapper = shallowMount(LigandChoice, {
       props: { ligands: ligands }
     })
-    const rows = wrapper.findAll('td')
-    await rows[0].trigger('click')
-    expect(rows[0].wrapperElement.classList.contains('highlight'))
+    const tableData = wrapper.findAll('td')
+    await tableData[0].trigger('click')
+    const row = tableData[0].element.parentElement
+    // eslint-disable-next-line no-unused-expressions
+    expect(row.classList.contains('highlighted')).to.be.true
     // eslint-disable-next-line no-unused-expressions
     expect(wrapper.emitted().ligandChosen).to.not.be.undefined
     expect(wrapper.emitted().ligandChosen[0][0]).to.equal('1')

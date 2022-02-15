@@ -54,10 +54,10 @@ export class StructureUtils {
     pocketRadius = 10.0) {
     const activeSiteAtoms =
       StructureUtils.getActiveSiteAtoms(ligandComponent, proteinComponent, pocketRadius)
-    const [activeSiteResidueAtoms] =
+    const [activeSiteResidueAtoms, activeSiteWaters] =
       StructureUtils.getActiveSiteResidues(activeSiteAtoms, proteinComponent)
 
-    const selectionString = activeSiteResidueAtoms.toSeleString()
+    const selectionString = activeSiteResidueAtoms.toSeleString() + activeSiteWaters.toSeleString()
     return proteinComponent.addRepresentation('licorice', {
       sele: selectionString,
       name: 'pocketLicorice',

@@ -1,4 +1,4 @@
-import { CustomComponent } from '@/internal/NGLContext'
+import { CustomComponent } from '@/NGLContext'
 
 /**
  * Wrapper around a structure as a component. A convenience object that associates the structure

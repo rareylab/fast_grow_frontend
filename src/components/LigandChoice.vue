@@ -67,7 +67,7 @@ export default {
     applyRow (row) {
       const rowID = row.children[0].textContent
       this.$emit('ligandChosen', rowID)
-      const rows = this.$refs['table-body'].querySelectorAll('tr')
+      const rows = this.$refs['table-body'].querySelectorAll('tr.highlighted')
       for (let i = 0; i < rows.length; i++) {
         rows[i].classList.remove('highlighted')
       }

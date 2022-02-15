@@ -76,6 +76,7 @@
                 href="#"
                 role="button"
                 aria-expanded="false"
+                id="interactions-dropdown"
             >
               Interactions
             </a>
@@ -157,7 +158,15 @@
               role="tabpanel"
               aria-labelledby="ligand-interactions-tab"
           >
-            <h2>Ligand Interactions</h2>
+            <ligand-interactions
+                :view="'ligand-interactions-tab'"
+                :data="this.ligandInteractions"
+                :loading="this.loadingInteractions"
+                :submit-error="this.interactionError"
+                @register="this.registerListener"
+                @picked="this.ligandInteractionPicked"
+            >
+            </ligand-interactions>
           </div>
         </div>
       </div>
@@ -166,20 +175,26 @@
 </template>
 
 <script>
+// external imports
 import * as bootstrap from 'bootstrap'
 import * as NGL from 'ngl'
-import { NGLContext } from '@/internal/NGLContext'
-import { Utils } from '@/internal/Utils'
-import { StructureUtils } from '@/internal/StructureUtils'
-import { GeometryUtils } from '@/internal/GeometryUtils'
-import { StructureUploadHandler } from '@/internal/StructureUploadHandler'
-import { CutHandler } from '@/internal/CutHandler'
+import _ from 'lodash'
+
+// internal imports
+import { NGLContext } from '@/NGLContext'
+import { Utils } from '@/utils/Utils'
+import { StructureUtils } from '@/utils/StructureUtils'
+import { GeometryUtils } from '@/utils/GeometryUtils'
+import { StructureUploadHandler } from '@/handlers/StructureUploadHandler'
+import { CutHandler } from '@/handlers/CutHandler'
+import { InteractionHandler } from '@/handlers/InteractionHandler'
 
 // components
 import StructureUpload from '@/components/StructureUpload'
 import LigandChoice from '@/components/LigandChoice'
 import PocketChoice from '@/components/PocketChoice'
 import Cut from '@/components/Cut'
+import LigandInteractions from '@/components/LigandInteractions'
 
 const viewDefinition = {
   'upload-tab': {
@@ -198,12 +213,17 @@ const viewDefinition = {
   'cut-tab': {
     visible: ['ensemble', 'pocket', ['core', 'ligand'], 'bondMarker'],
     focus: ['ligand', 'protein']
+  },
+  'ligand-interactions-tab': {
+    visible: ['ensemble', 'pocket', 'ligand', 'bondMarker', 'ligandInteractions'],
+    focus: ['ligand', 'protein']
   }
 }
 
 export default {
   name: 'FastGrow',
   components: {
+    LigandInteractions,
     PocketChoice,
     LigandChoice,
     StructureUpload,
@@ -211,10 +231,14 @@ export default {
   },
   data () {
     return {
+      // status defining variables
       structureSubmitError: undefined,
       cutSubmitError: undefined,
+      interactionError: undefined,
+      loadingInteractions: false,
       pollingServer: false,
       baseUrl: 'http://localhost:8000', // TODO edit in production
+      // data variables
       // this state is duplicated from the nglContext because the Vue proxy breaks NGL components
       ligands: undefined,
       ligand: undefined,
@@ -223,7 +247,10 @@ export default {
       bondMarker: undefined,
       linker: undefined,
       anchor: undefined,
-      core: undefined
+      core: undefined,
+      interaction: undefined,
+      ligandInteractions: undefined,
+      pickedInteractions: new Map()
     }
   },
   methods: {
@@ -319,7 +346,7 @@ export default {
       this.anchor = anchor
       this.linker = linker
       const bondMarker = GeometryUtils.makeExitBondMarker(
-        this.anchor.positionToArray(), this.linker.positionToArray(), this.stage)
+        this.stage, this.anchor.positionToArray(), this.linker.positionToArray())
       this.nglContext.registerReplaceComponent('bondMarker', bondMarker)
       this.bondMarker = bondMarker
       this.nglContext.render()
@@ -359,6 +386,37 @@ export default {
         this.stage.removeComponent(this.core)
         this.nglContext.render()
       }
+    },
+    async updateInteractions (interaction) {
+      try {
+        this.loadingInteractions = true
+        const response = await fetch(this.baseUrl + '/interactions', {
+          method: 'post',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(interaction)
+        })
+        let searchPointData = await response.json()
+        searchPointData = await this.pollUpload(searchPointData, this.baseUrl + '/interactions/')
+        this.interactionHandler.load(interaction, searchPointData)
+        this.loadingInteractions = false
+        this.nglContext.render()
+      } catch (error) {
+        console.error(error)
+        this.interactionError = 'An error occurred while generating interactions'
+        this.loadingInteractions = false
+      }
+    },
+    ligandInteractionPicked (interactionId) {
+      const ligandInteractionsComponent = this.nglContext.components.get('ligandInteractions')
+      if (!ligandInteractionsComponent) {
+        return
+      }
+      const [toggledOn, geometry] = ligandInteractionsComponent.toggleHighlight(interactionId)
+      if (toggledOn) {
+        this.pickedInteractions.set(geometry.id, geometry.ligandInteraction)
+      } else {
+        this.pickedInteractions.delete(geometry.id)
+      }
     }
   },
   mounted () {
@@ -376,14 +434,31 @@ export default {
     // handlers
     this.structureUploadHandler = new StructureUploadHandler(this.nglContext, this.$data, this.componentCache)
     this.cutHandler = new CutHandler(this.nglContext, this.$data, this.componentCache)
+    this.interactionHandler = new InteractionHandler(this.nglContext, this.$data, this.componentCache)
 
     window.addEventListener('resize', () => {
       this.stage.viewer.handleResize()
     })
+
     window.addEventListener('show.bs.tab', (event) => {
       const view = event.target.getAttribute('data-bs-target').slice(1)
       this.nglContext.switchView(view)
     })
+
+    window.addEventListener('show.bs.tab', (event) => {
+      const view = event.target.getAttribute('data-bs-target').slice(1)
+      if (view.includes('interactions') && this.ligand && this.pocket) {
+        const interaction = {
+          ligand_id: this.ligand.id,
+          complex_id: this.pocket.id
+        }
+        if (_.isEqual(this.interaction, interaction)) {
+          return
+        }
+        this.updateInteractions(interaction)
+      }
+    })
+
     window.addEventListener('remove', (event) => {
       this.removeDerivedData(event.derivedFrom)
     })
