@@ -93,6 +93,18 @@
                   Ligand
                 </a>
               </li>
+              <li>
+                <a
+                    class="dropdown-item"
+                    href="#"
+                    id="water-interactions-tab-trigger"
+                    data-bs-toggle="tab"
+                    data-bs-target="#water-interactions-tab"
+                    aria-controls="water-interactions-tab"
+                >
+                  Water
+                </a>
+              </li>
             </ul>
           </li>
         </ul>
@@ -158,15 +170,33 @@
               role="tabpanel"
               aria-labelledby="ligand-interactions-tab"
           >
-            <ligand-interactions
+            <interaction-table
                 :view="'ligand-interactions-tab'"
+                :title="'Ligand'"
                 :data="this.ligandInteractions"
                 :loading="this.loadingInteractions"
                 :submit-error="this.interactionError"
                 @register="this.registerListener"
                 @picked="this.ligandInteractionPicked"
             >
-            </ligand-interactions>
+            </interaction-table>
+          </div>
+          <div
+              class="tab-pane fade h-100"
+              id="water-interactions-tab"
+              role="tabpanel"
+              aria-labelledby="water-interactions-tab"
+          >
+            <interaction-table
+                :view="'water-interactions-tab'"
+                :title="'Water'"
+                :data="this.waterInteractions"
+                :loading="this.loadingInteractions"
+                :submit-error="this.interactionError"
+                @register="this.registerListener"
+                @picked="this.waterInteractionPicked"
+            >
+            </interaction-table>
           </div>
         </div>
       </div>
@@ -194,7 +224,7 @@ import StructureUpload from '@/components/StructureUpload'
 import LigandChoice from '@/components/LigandChoice'
 import PocketChoice from '@/components/PocketChoice'
 import Cut from '@/components/Cut'
-import LigandInteractions from '@/components/LigandInteractions'
+import InteractionTable from '@/components/InteractionTable'
 
 const viewDefinition = {
   'upload-tab': {
@@ -217,13 +247,17 @@ const viewDefinition = {
   'ligand-interactions-tab': {
     visible: ['ensemble', 'pocket', 'ligand', 'bondMarker', 'ligandInteractions'],
     focus: ['ligand', 'protein']
+  },
+  'water-interactions-tab': {
+    visible: ['ensemble', 'pocket', 'ligand', 'bondMarker', 'waterInteractions'],
+    focus: ['ligand', 'protein']
   }
 }
 
 export default {
   name: 'FastGrow',
   components: {
-    LigandInteractions,
+    InteractionTable,
     PocketChoice,
     LigandChoice,
     StructureUpload,
@@ -250,6 +284,7 @@ export default {
       core: undefined,
       interaction: undefined,
       ligandInteractions: undefined,
+      waterInteractions: undefined,
       pickedInteractions: new Map()
     }
   },
@@ -406,12 +441,24 @@ export default {
         this.loadingInteractions = false
       }
     },
-    ligandInteractionPicked (interactionId) {
+    ligandInteractionPicked (interactionID) {
       const ligandInteractionsComponent = this.nglContext.components.get('ligandInteractions')
       if (!ligandInteractionsComponent) {
         return
       }
-      const [toggledOn, geometry] = ligandInteractionsComponent.toggleHighlight(interactionId)
+      const [toggledOn, geometry] = ligandInteractionsComponent.toggleHighlight(interactionID)
+      if (toggledOn) {
+        this.pickedInteractions.set(geometry.id, geometry.ligandInteraction)
+      } else {
+        this.pickedInteractions.delete(geometry.id)
+      }
+    },
+    waterInteractionPicked (interactionID) {
+      const waterInteractionsComponent = this.nglContext.components.get('waterInteractions')
+      if (!waterInteractionsComponent) {
+        return
+      }
+      const [toggledOn, geometry] = waterInteractionsComponent.toggleHighlight(interactionID)
       if (toggledOn) {
         this.pickedInteractions.set(geometry.id, geometry.ligandInteraction)
       } else {

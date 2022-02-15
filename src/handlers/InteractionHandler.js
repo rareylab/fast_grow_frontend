@@ -9,19 +9,27 @@ export class InteractionHandler {
   }
 
   load (interaction, searchPointData) {
-    const ligandInteractionsComponent = InteractionHandler.loadLigandInteractions(
-      searchPointData.data.ligandSearchPoints, this.nglContext.stage)
+    const ligandInteractionsComponent = InteractionHandler.loadInteractions(
+      searchPointData.data.ligandSearchPoints,
+      this.nglContext.stage)
     this.nglContext.registerComponent('ligandInteractions', ligandInteractionsComponent)
-    this.data.interaction = interaction
     this.data.ligandInteractions = Array.from(ligandInteractionsComponent.geometryMap.values())
+    const waterInteractionsComponent = InteractionHandler.loadInteractions(
+      searchPointData.data.waterSearchPoints,
+      this.nglContext.stage,
+      searchPointData.data.ligandSearchPoints.length
+    )
+    this.nglContext.registerComponent('waterInteractions', waterInteractionsComponent)
+    this.data.waterInteractions = Array.from(waterInteractionsComponent.geometryMap.values())
+    this.data.interaction = interaction
   }
 
-  static loadLigandInteractions (ligandSearchPoints, stage) {
-    InteractionHandler.loadSearchPoints(ligandSearchPoints, stage)
+  static loadInteractions (ligandSearchPoints, stage, startIndex = 0) {
+    InteractionHandler.loadSearchPoints(ligandSearchPoints, stage, startIndex)
     return new GeometryCollectionComponent(ligandSearchPoints)
   }
 
-  static loadSearchPoints (searchPoints, stage) {
+  static loadSearchPoints (searchPoints, stage, startIndex = 0) {
     searchPoints.forEach((searchPoint, index) => {
       if (searchPoint.ligandInteraction.type === 'ACCEPTOR' ||
         searchPoint.ligandInteraction.type === 'DONOR') {
@@ -29,7 +37,7 @@ export class InteractionHandler {
       } else {
         searchPoint.component = GeometryUtils.makeHydrophobicPoint(stage, searchPoint.ligandInteraction)
       }
-      searchPoint.id = index
+      searchPoint.id = startIndex + index
     })
   }
 }

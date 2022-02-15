@@ -1,10 +1,10 @@
 import { expect } from 'chai'
 import { shallowMount } from '@vue/test-utils'
-import LigandInteractions from '@/components/LigandInteractions'
+import LigandInteractions from '@/components/InteractionTable'
 
-describe('LigandInteractions', () => {
+describe('InteractionTable', () => {
   it('applies a clicked row', async () => {
-    const ligandInteractions = [
+    const interactions = [
       {
         id: 0,
         ligandInteraction: {
@@ -67,7 +67,7 @@ describe('LigandInteractions', () => {
       }
     ]
     const wrapper = shallowMount(LigandInteractions, {
-      props: { data: ligandInteractions }
+      props: { data: interactions }
     })
     const tableData = wrapper.findAll('td')
     await tableData[0].trigger('click')
@@ -83,7 +83,7 @@ describe('LigandInteractions', () => {
   })
 
   it('applies a clicked interaction', () => {
-    const ligandInteractions = [
+    const interactions = [
       {
         id: 0,
         ligandInteraction: {
@@ -111,10 +111,10 @@ describe('LigandInteractions', () => {
       }
     ]
     const wrapper = shallowMount(LigandInteractions, {
-      props: { data: ligandInteractions }
+      props: { data: interactions }
     })
     const mockPickingProxy = {
-      cylinder: ligandInteractions[0].component
+      cylinder: interactions[0].component
     }
     wrapper.vm.interactionClicked(mockPickingProxy)
     const rows = wrapper.findAll('tr')

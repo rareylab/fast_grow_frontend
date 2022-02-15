@@ -1,6 +1,6 @@
 <template>
   <div ref="header">
-    <h2>Choose Ligand Interactions</h2>
+    <h2>Choose {{ this.title }} Interactions</h2>
     <p v-if="this.loading">
       <span
           class="spinner-grow spinner-grow-sm"
@@ -35,9 +35,10 @@
 import _ from 'lodash'
 
 export default {
-  name: 'LigandInteractions',
+  name: 'InteractionTable',
   emits: ['register', 'picked'],
   props: {
+    title: String,
     view: String,
     data: Object,
     loading: Boolean,
