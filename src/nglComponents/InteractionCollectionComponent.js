@@ -1,10 +1,14 @@
 import { CustomComponent } from '@/NGLContext'
 
-export class GeometryCollectionComponent extends CustomComponent {
-  constructor (geometries) {
+export class InteractionCollectionComponent extends CustomComponent {
+  // opacity values for different states
+  SHADOW = 0.5
+  HIGHLIGHT = 0.8
+
+  constructor (interactionGeometries) {
     super()
     this.geometryMap = new Map()
-    geometries.forEach((geometry) => {
+    interactionGeometries.forEach((geometry) => {
       if (geometry.id === undefined) {
         throw Error('Invalid geometry does not have an ID')
       }
@@ -41,10 +45,10 @@ export class GeometryCollectionComponent extends CustomComponent {
     const geometry = this.geometryMap.get(geometryID)
     let toggledOn = true
     const representation = geometry.component.reprList[0]
-    if (representation.getParameters().opacity === 0.5) {
-      representation.setParameters({ opacity: 0.8 })
+    if (representation.getParameters().opacity === this.SHADOW) {
+      representation.setParameters({ opacity: this.HIGHLIGHT })
     } else {
-      representation.setParameters({ opacity: 0.5 })
+      representation.setParameters({ opacity: this.SHADOW })
       toggledOn = false
     }
     return [toggledOn, geometry]

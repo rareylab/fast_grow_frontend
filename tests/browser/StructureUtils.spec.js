@@ -11,18 +11,20 @@ describe('StructureUtils', () => {
     const element = document.createElement('div')
     element.setAttribute('id', 'viewport')
     document.body.append(element)
+    /* Only create one NGL per test suite. Creating and destroying too many
+       NGL instances results in strange non-deterministic errors */
+    stage = new NGL.Stage('viewport')
   })
 
   after(function () {
     document.getElementById('viewport').remove()
-  })
-
-  beforeEach(() => {
-    stage = new NGL.Stage('viewport')
+    stage.dispose()
   })
 
   afterEach(function () {
-    stage.dispose()
+    stage.compList.forEach((component) => {
+      stage.removeComponent(component)
+    })
   })
 
   it('adds a molecule structure', async function () {
@@ -59,9 +61,9 @@ describe('StructureUtils', () => {
     const activeSiteAtoms = StructureUtils.getActiveSiteAtoms(ligandComponent, proteinComponent, 10)
     const [activeSiteResidueAtoms, activeSiteWaters] = StructureUtils.getActiveSiteResidues(activeSiteAtoms, proteinComponent)
     const nofAtoms = activeSiteResidueAtoms.toSeleString().split(',').length
-    expect(nofAtoms).to.equal(621)
+    expect(nofAtoms).to.equal(46)
     const nofWaters = activeSiteWaters.toSeleString().split(',').length
-    expect(nofWaters).to.equal(50)
+    expect(nofWaters).to.equal(1)
   })
 
   it('detects a bond in the same ring', async function () {

@@ -6,10 +6,10 @@ import { GeometryUtils } from '@/utils/GeometryUtils'
 
 // mock functions that interact with NGL
 GeometryUtils.makeHBondInteraction = (stage) => {
-  stage.addComponentFromObject()
+  return stage.addComponentFromObject()
 }
 GeometryUtils.makeHydrophobicPoint = (stage) => {
-  stage.addComponentFromObject()
+  return stage.addComponentFromObject()
 }
 
 describe('InteractionHandler', () => {
@@ -17,9 +17,20 @@ describe('InteractionHandler', () => {
     const ligandSearchPoints = TestData.searchPointData.data.ligandSearchPoints
     const stage = new MockStage()
     const ligandInteractionsComponent =
-      InteractionHandler.loadLigandInteractions(ligandSearchPoints, stage)
+      InteractionHandler.loadInteractions(ligandSearchPoints, stage)
     // eslint-disable-next-line no-unused-expressions
     expect(ligandInteractionsComponent).to.not.be.undefined
     expect(stage.components.length).to.equal(ligandSearchPoints.length)
+  })
+
+  it('loads residue search point data', () => {
+    const residueSearchPoints = TestData.searchPointData.data.activeSiteSearchPoints
+    const stage = new MockStage()
+    const [residueToInteractions, pocketInteractionsComponent] =
+      InteractionHandler.loadResidueInteractions(residueSearchPoints, stage)
+    const residues = new Set()
+    residueSearchPoints.mapping.forEach((mapping) => residues.add(mapping[1]))
+    expect(residueToInteractions.size).to.equal(residues.size)
+    expect(pocketInteractionsComponent.geometryMap.size).to.equal(residueSearchPoints.searchPoints.length)
   })
 })

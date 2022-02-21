@@ -46,6 +46,21 @@ export class GeometryUtils {
     return interactionComponent
   }
 
+  static makeHBondPoint (stage, interaction, options = {}) {
+    let color = new NGL.Color(0, 1, 0)
+    if (interaction.type === 'ACCEPTOR') {
+      color = new NGL.Color(1, 0, 0)
+    }
+    options.name = options.name || 'interactionGeometry'
+    options.opacity = options.opacity || 0.5
+    const interactionGeometry = new NGL.Shape(options.name)
+    interactionGeometry.addSphere(interaction.position, color, 1, options.name)
+    const interactionComponent = stage.addComponentFromObject(interactionGeometry)
+    interactionComponent.addRepresentation('buffer', options)
+    interactionComponent.setVisibility(false)
+    return interactionComponent
+  }
+
   static makeHydrophobicPoint (stage, interactionPoint, options = {}) {
     const color = new NGL.Color(0.8, 0.8, 0)
     options.name = options.name || 'interactionsGeometry'

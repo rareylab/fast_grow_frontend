@@ -28,16 +28,34 @@ export class MockStage {
 
 export class MockComponent {
   // eslint-disable-next-line no-useless-constructor
-  constructor () {}
+  constructor () {
+    this.visible = true
+    this.reprList = []
+  }
 
   addRepresentation () {
-    return new MockRepresentation(this)
+    const representation = new MockRepresentation(this)
+    this.reprList.push(representation)
+    return representation
+  }
+
+  setVisibility (value) {
+    this.visible = value
   }
 }
 
 export class MockRepresentation {
   constructor (component) {
     this.parent = component
+    this.parameters = { opacity: 0 }
+  }
+
+  getParameters () {
+    return this.parameters
+  }
+
+  setParameters (parameters) {
+    this.parameters = parameters
   }
 }
 

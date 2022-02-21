@@ -81,7 +81,10 @@ export class NGLContext {
    * @returns {NGLContext}
    */
   addView (view, definition = undefined) {
-    const copiedDefinition = { visible: new Set(), focus: [] }
+    const copiedDefinition = {
+      visible: new Set(),
+      focus: []
+    }
     if (definition) {
       // visible components converted to set for easier handling
       copiedDefinition.visible = new Set(definition.visible)
@@ -211,6 +214,7 @@ export class NGLContext {
    * Replace a registered component.
    * @param {string} name name to register component under
    * @param {object} component new component to replace the old one
+   * @return {object} replaced component
    */
   replaceComponent (name, component) {
     this.__validateComponent(component)
@@ -225,6 +229,7 @@ export class NGLContext {
     this.componentSet.delete(formerComponent)
     this.components.set(name, component)
     this.componentSet.add(component)
+    return formerComponent
   }
 
   /**
@@ -232,21 +237,25 @@ export class NGLContext {
    * Use if you don't care whether the component existed before.
    * @param {string} name name to register component under
    * @param {object} component new component to register or to replace the old one
+   * @return {object|undefined} replaced component or undefined
    */
   registerReplaceComponent (name, component) {
     this.__validateComponent(component)
+    let formerComponent
     if (this.components.has(name)) {
-      const formerComponent = this.components.get(name)
+      formerComponent = this.components.get(name)
       formerComponent.setVisibility(false)
       this.componentSet.delete(formerComponent)
     }
     this.components.set(name, component)
     this.componentSet.add(component)
+    return formerComponent
   }
 
   /**
    * De-register a component.
    * @param {string} name name of the registered component
+   * @return {object} removed component
    */
   deregisterComponent (name) {
     const formerComponent = this.components.get(name)
@@ -255,6 +264,7 @@ export class NGLContext {
       this.componentSet.delete(formerComponent)
     }
     this.components.delete(name)
+    return formerComponent
   }
 
   /**

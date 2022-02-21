@@ -175,4 +175,20 @@ export class StructureUtils {
       return ring.includes(bond.atom1.index) && ring.includes(bond.atom2.index)
     })
   }
+
+  static pocketHighlight = NGL.ColormakerRegistry.addSelectionScheme([
+    ['pink', '_C'],
+    ['red', '_O'],
+    ['blue', '_N'],
+    ['yellow', '_S'],
+    ['orange', '_Se']
+  ], 'pocketHighlight')
+
+  static addPocketHighlight (proteinComponent, selection) {
+    return proteinComponent.addRepresentation('licorice', {
+      sele: selection,
+      name: 'pocketHighlight',
+      color: this.pocketHighlight
+    })
+  }
 }

@@ -10,18 +10,20 @@ describe('GeometryUtils', () => {
     const element = document.createElement('div')
     element.setAttribute('id', 'viewport')
     document.body.append(element)
-  })
-
-  after(function () {
-    document.getElementById('viewport').remove()
-  })
-
-  beforeEach(() => {
+    /* Only create one NGL per test suite. Creating and destroying too many
+       NGL instances results in strange non-deterministic errors */
     stage = new NGL.Stage('viewport')
   })
 
-  afterEach(function () {
+  after(function () {
     stage.dispose()
+    document.getElementById('viewport').remove()
+  })
+
+  afterEach(function () {
+    stage.compList.forEach((component) => {
+      stage.removeComponent(component)
+    })
   })
 
   it('makes a bond marker', () => {
@@ -67,6 +69,25 @@ describe('GeometryUtils', () => {
     const shape = component.shape
     expect(shape.cylinderPosition1).to.eql(interaction.ligandInteraction.position)
     expect(shape.cylinderPosition2).to.eql(interaction.siteInteraction.position)
+  })
+
+  it('makes an hbond point', () => {
+    const interaction = {
+      position: [
+        -27.55321965136167,
+        16.69443911623349,
+        -18.314276453143897
+      ],
+      type: 'ACCEPTOR'
+    }
+    const component = GeometryUtils.makeHBondPoint(stage, interaction)
+    // eslint-disable-next-line no-unused-expressions
+    expect(component).to.not.be.undefined
+    // eslint-disable-next-line no-unused-expressions
+    expect(component.visible).to.be.false
+    expect(stage.compList.length).to.equal(1)
+    const shape = component.shape
+    expect(shape.spherePosition).to.eql(interaction.position)
   })
 
   it('makes a hydrophobic interaction', () => {

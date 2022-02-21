@@ -67,7 +67,7 @@ describe('InteractionTable', () => {
       }
     ]
     const wrapper = shallowMount(LigandInteractions, {
-      props: { data: interactions }
+      props: { interactions: interactions }
     })
     const tableData = wrapper.findAll('td')
     await tableData[0].trigger('click')
@@ -111,7 +111,7 @@ describe('InteractionTable', () => {
       }
     ]
     const wrapper = shallowMount(LigandInteractions, {
-      props: { data: interactions }
+      props: { interactions: interactions }
     })
     const mockPickingProxy = {
       cylinder: interactions[0].component

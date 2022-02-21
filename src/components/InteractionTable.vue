@@ -21,7 +21,7 @@
       </tr>
       </thead>
       <tbody ref="table-body">
-      <tr v-for="interaction in this.sortedData" :key="interaction.score">
+      <tr v-for="interaction in this.sortedInteractions" :key="interaction.id">
         <td>{{ interaction.id }}</td>
         <td>{{ interaction.ligandInteraction.type }}</td>
         <td>{{ interaction.score.toFixed(2) }}</td>
@@ -40,14 +40,14 @@ export default {
   props: {
     title: String,
     view: String,
-    data: Object,
+    interactions: Array,
     loading: Boolean,
     submitError: String
   },
   computed: {
-    sortedData () {
-      const interactions = this.data === undefined ? [] : this.data.slice()
-      interactions.sort(this.compareScore)
+    sortedInteractions () {
+      const interactions = this.interactions === undefined ? [] : this.interactions.slice()
+      interactions.sort(this.compareID)
       return interactions
     }
   },
@@ -66,7 +66,7 @@ export default {
       tableField.style.height = 0 + 'px' // reduce height to avoid changing parent height
       tableField.style.height = (tableField.parentElement.clientHeight - header.clientHeight - margin) + 'px'
     },
-    compareScore (first, second) {
+    compareID (first, second) {
       if (first.id < second.id) {
         return -1
       }
@@ -87,7 +87,7 @@ export default {
       }
       const pickedInteractionShape = pickingProxy.cylinder || pickingProxy.sphere
       let pickedInteraction
-      this.sortedData.some((interaction) => {
+      this.sortedInteractions.some((interaction) => {
         // deep equality necessary because objects are wrapped by vue
         if (_.isEqual(interaction.component.shape, pickedInteractionShape.shape)) {
           pickedInteraction = interaction

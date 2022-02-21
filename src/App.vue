@@ -105,6 +105,18 @@
                   Water
                 </a>
               </li>
+              <li>
+                <a
+                    class="dropdown-item"
+                    href="#"
+                    id="pocket-interactions-tab-trigger"
+                    data-bs-toggle="tab"
+                    data-bs-target="#pocket-interactions-tab"
+                    aria-controls="pocket-interactions-tab"
+                >
+                  Pocket
+                </a>
+              </li>
             </ul>
           </li>
         </ul>
@@ -173,7 +185,7 @@
             <interaction-table
                 :view="'ligand-interactions-tab'"
                 :title="'Ligand'"
-                :data="this.ligandInteractions"
+                :interactions="this.ligandInteractions"
                 :loading="this.loadingInteractions"
                 :submit-error="this.interactionError"
                 @register="this.registerListener"
@@ -190,13 +202,31 @@
             <interaction-table
                 :view="'water-interactions-tab'"
                 :title="'Water'"
-                :data="this.waterInteractions"
+                :interactions="this.waterInteractions"
                 :loading="this.loadingInteractions"
                 :submit-error="this.interactionError"
                 @register="this.registerListener"
                 @picked="this.waterInteractionPicked"
             >
             </interaction-table>
+          </div>
+          <div
+              class="tab-pane fade h-100"
+              id="pocket-interactions-tab"
+              role="tabpanel"
+              aria-labelledby="pocket-interactions-tab"
+          >
+            <interaction-picker
+                :view="'pocket-interactions-tab'"
+                :interactions="this.pocketInteractions"
+                :loading="this.loadingInteractions"
+                :submit-error="this.interactionError"
+                @register="this.registerListener"
+                @change="this.toggleInteractionShadows"
+                @picked="this.pocketInteractionPicked"
+                @highlight="this.toggleResidueShadows"
+            >
+            </interaction-picker>
           </div>
         </div>
       </div>
@@ -225,6 +255,7 @@ import LigandChoice from '@/components/LigandChoice'
 import PocketChoice from '@/components/PocketChoice'
 import Cut from '@/components/Cut'
 import InteractionTable from '@/components/InteractionTable'
+import InteractionPicker from '@/components/InteractionPicker'
 
 const viewDefinition = {
   'upload-tab': {
@@ -234,29 +265,34 @@ const viewDefinition = {
   'ligands-tab': {
     // both ligands an ligand are visible so both the choices and the chosen are visible
     visible: ['ensemble', 'pocket', 'ligands', 'ligand'],
-    focus: ['ligand', 'ligands', 'protein']
+    focus: ['ligand', 'ligands', 'pocket']
   },
   'pockets-tab': {
     visible: ['ensemble', 'pocket', 'ligand'],
-    focus: ['ligand', 'protein']
+    focus: ['ligand', 'pocket']
   },
   'cut-tab': {
     visible: ['ensemble', 'pocket', ['core', 'ligand'], 'bondMarker'],
-    focus: ['ligand', 'protein']
+    focus: ['ligand', 'pocket']
   },
   'ligand-interactions-tab': {
     visible: ['ensemble', 'pocket', 'ligand', 'bondMarker', 'ligandInteractions'],
-    focus: ['ligand', 'protein']
+    focus: ['ligand', 'pocket']
   },
   'water-interactions-tab': {
     visible: ['ensemble', 'pocket', 'ligand', 'bondMarker', 'waterInteractions'],
-    focus: ['ligand', 'protein']
+    focus: ['ligand', 'pocket']
+  },
+  'pocket-interactions-tab': {
+    visible: ['ensemble', 'pocket', 'ligand', 'bondMarker', 'pocketInteractions', 'pocketHighlight'],
+    focus: ['ligand', 'pocket']
   }
 }
 
 export default {
   name: 'FastGrow',
   components: {
+    InteractionPicker,
     InteractionTable,
     PocketChoice,
     LigandChoice,
@@ -285,6 +321,9 @@ export default {
       interaction: undefined,
       ligandInteractions: undefined,
       waterInteractions: undefined,
+      pocketInteractions: undefined,
+      residueToInteractions: undefined,
+      highlightedResidue: undefined,
       pickedInteractions: new Map()
     }
   },
@@ -368,10 +407,8 @@ export default {
           complexComponent.structureModel.component.removeRepresentation(representation)
         }
       })
-      const pocketRepresentation = StructureUtils.addPocket(
-        this.ligand.component,
-        complexComponent.structureModel.component
-      )
+      const pocketRepresentation =
+          StructureUtils.addPocket(this.ligand.component, complexComponent.structureModel.component)
       this.pocket = pocketRepresentation
       this.nglContext.registerReplaceComponent('pocket', pocketRepresentation)
       this.nglContext.render()
@@ -380,8 +417,8 @@ export default {
       this.removeChosenBond()
       this.anchor = anchor
       this.linker = linker
-      const bondMarker = GeometryUtils.makeExitBondMarker(
-        this.stage, this.anchor.positionToArray(), this.linker.positionToArray())
+      const bondMarker =
+          GeometryUtils.makeExitBondMarker(this.stage, this.anchor.positionToArray(), this.linker.positionToArray())
       this.nglContext.registerReplaceComponent('bondMarker', bondMarker)
       this.bondMarker = bondMarker
       this.nglContext.render()
@@ -442,27 +479,64 @@ export default {
       }
     },
     ligandInteractionPicked (interactionID) {
-      const ligandInteractionsComponent = this.nglContext.components.get('ligandInteractions')
-      if (!ligandInteractionsComponent) {
+      this.interactionPicked(interactionID, 'ligandInteractions')
+    },
+    waterInteractionPicked (interactionID) {
+      this.interactionPicked(interactionID, 'waterInteractions')
+    },
+    pocketInteractionPicked (interactionID) {
+      this.interactionPicked(interactionID, 'pocketInteractions')
+    },
+    interactionPicked (interactionID, componentName) {
+      const interactionComponent = this.nglContext.components.get(componentName)
+      if (!interactionComponent) {
         return
       }
-      const [toggledOn, geometry] = ligandInteractionsComponent.toggleHighlight(interactionID)
+      const [toggledOn, geometry] = interactionComponent.toggleHighlight(interactionID)
       if (toggledOn) {
-        this.pickedInteractions.set(geometry.id, geometry.ligandInteraction)
+        this.pickedInteractions.set(geometry.id, geometry)
       } else {
         this.pickedInteractions.delete(geometry.id)
       }
     },
-    waterInteractionPicked (interactionID) {
-      const waterInteractionsComponent = this.nglContext.components.get('waterInteractions')
-      if (!waterInteractionsComponent) {
+    toggleInteractionShadows (_event) {
+      const pocketInteractionComponent = this.nglContext.components.get('pocketInteractions')
+      if (!pocketInteractionComponent) {
         return
       }
-      const [toggledOn, geometry] = waterInteractionsComponent.toggleHighlight(interactionID)
-      if (toggledOn) {
-        this.pickedInteractions.set(geometry.id, geometry.ligandInteraction)
-      } else {
-        this.pickedInteractions.delete(geometry.id)
+      pocketInteractionComponent.toggleAllShadows()
+      this.nglContext.render()
+    },
+    toggleResidueShadows (residueName) {
+      const [residueType, chainName, residueNumber] = residueName.split('_')
+      if (residueType === 'HET' || !chainName || !residueNumber) {
+        return
+      }
+      const selection = ':' + chainName + ' and ' + residueNumber
+      const proteinComponent = this.nglContext.components.get('pocket').parent
+      const highlightRepresentation = StructureUtils.addPocketHighlight(proteinComponent, selection)
+      const replacedHighlight =
+          this.nglContext.registerReplaceComponent('pocketHighlight', highlightRepresentation)
+      proteinComponent.removeRepresentation(replacedHighlight)
+
+      // switch off former shadows
+      const interactionComponent = this.nglContext.components.get('pocketInteractions')
+      if (this.highlightedResidue) {
+        const formerInteractionIDs = this.residueToInteractions.get(this.highlightedResidue)
+        if (formerInteractionIDs) {
+          formerInteractionIDs.forEach((interactionID) => {
+            interactionComponent.disableShadow(interactionID)
+          })
+        }
+      }
+
+      // switch on current shadows
+      this.highlightedResidue = residueName
+      const interactionIDs = this.residueToInteractions.get(this.highlightedResidue)
+      if (interactionIDs) {
+        interactionIDs.forEach((interactionID) => {
+          interactionComponent.enableShadow(interactionID)
+        })
       }
     }
   },
