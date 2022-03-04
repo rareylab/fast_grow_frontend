@@ -3,31 +3,25 @@ import os
 import unittest
 import time
 
-from selenium import webdriver
-from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 
-from tests import CHROMEDRIVER, SERVER_TIMEOUT, URL, HEADLESS, TEST_FILES
+from tests import CHROME, CHROMEDRIVER, SERVER_TIMEOUT, URL, HEADLESS, TEST_FILES
 from tests.utils.waiters import element_has_css_class, element_not_disabled, js_returns_true
+from tests.utils.webdriver import setup_webdriver
 
 
 class CutTests(unittest.TestCase):
     """ligand cutting tests"""
 
     def setUp(self):
-            service = Service(CHROMEDRIVER)
-            chrome_options = webdriver.ChromeOptions()
-            chrome_options.headless = HEADLESS
-            # prevent CORS problems when using a localhost server
-            chrome_options.add_argument('--disable-web-security')
-            self.driver = webdriver.Chrome(service=service, options=chrome_options)
+        self.driver = setup_webdriver()
 
     def tearDown(self):
         self.driver.close()
 
     def test_ligand_cut(self):
+        """test cutting a ligand"""
         self.driver.get(URL)
         protein_file_field = self.driver.find_element(By.ID, 'protein-file-field')
         protein_file_field.send_keys(os.path.join(TEST_FILES, '7A4R_1.pdb'))

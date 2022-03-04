@@ -54,7 +54,7 @@ export class CutHandler {
       multipleBond: true
     })
     const core = new StructureModelComponent(coreModel, coreRepresentation)
+    this.data.core = coreModel
     this.nglContext.registerReplaceComponent('core', core)
-    this.data.core = core
   }
 }

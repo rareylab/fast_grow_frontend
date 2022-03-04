@@ -44,6 +44,7 @@ export class StructureUploadHandler {
   async load (ensemble) {
     // const catFound = new CustomEvent('remove', { derivedFrom: 'ligands' })
     // window.dispatchEvent(catFound)
+    this.data.ensemble = ensemble
 
     const [complexRepresentations, ligandChoiceRepresentations, ligandComponents] =
       await StructureUploadHandler.loadEnsemble(ensemble, this.nglContext.stage)
@@ -57,15 +58,16 @@ export class StructureUploadHandler {
     this.data.ligands = ligandsComponent.structureModels
 
     if (ensemble.ligands.length === 1) {
+      // TODO set ligand with linker to ligand
       this.nglContext.registerReplaceComponent('ligand', ligandComponents[0])
       this.data.ligand = ligandComponents[0].structureModel
-      if (complexRepresentations.length === 1) {
+      if (ensemble.complexes.length === 1) {
         const pocketRepresentation = StructureUtils.addPocket(
           ligandComponents[0].structureModel.component,
-          complexRepresentations[0].parent
+          ensemble.complexes[0].component
         )
         this.nglContext.registerReplaceComponent('pocket', pocketRepresentation)
-        this.data.pocket = pocketRepresentation
+        this.data.pocket = ensemble.complexes[0]
       }
     }
 

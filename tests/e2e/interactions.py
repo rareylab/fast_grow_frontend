@@ -1,27 +1,20 @@
-"""ligand cutting tests"""
+"""interactions tests"""
 import os
 import unittest
-import time
 
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
-from tests import CHROMEDRIVER, SERVER_TIMEOUT, URL, HEADLESS, TEST_FILES
+from tests import SERVER_TIMEOUT, URL, TEST_FILES
 from tests.utils.waiters import element_has_css_class, element_does_not_exist
+from tests.utils.webdriver import setup_webdriver
 
 
 class InteractionsTests(unittest.TestCase):
-    """ligand cutting tests"""
+    """interactions tests"""
 
     def setUp(self):
-            service = Service(CHROMEDRIVER)
-            chrome_options = webdriver.ChromeOptions()
-            chrome_options.headless = HEADLESS
-            # prevent CORS problems when using a localhost server
-            chrome_options.add_argument('--disable-web-security')
-            self.driver = webdriver.Chrome(service=service, options=chrome_options)
+        self.driver = setup_webdriver()
 
     def tearDown(self):
         self.driver.close()
@@ -46,5 +39,5 @@ class InteractionsTests(unittest.TestCase):
             element_does_not_exist((By.CLASS_NAME, 'spinner-grow')))
         interactions_tab = self.driver.find_element(By.ID, 'ligand-interactions-tab')
         interaction_rows = interactions_tab.find_elements(By.TAG_NAME, 'tr')
-        # 7 ligands one header row
+        # 7 interactions one header row
         self.assertEqual(len(interaction_rows) - 1, 7)

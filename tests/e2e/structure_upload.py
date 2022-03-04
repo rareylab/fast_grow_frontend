@@ -2,26 +2,20 @@
 import os
 import unittest
 
-from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.support.ui import WebDriverWait
 
-from tests import CHROMEDRIVER, SERVER_TIMEOUT, URL, HEADLESS, TEST_FILES
+from tests import SERVER_TIMEOUT, URL, TEST_FILES
 from tests.utils.waiters import element_has_css_class
+from tests.utils.webdriver import setup_webdriver
 
 
 class StructureUploadTests(unittest.TestCase):
     """structure upload and processing tests"""
 
     def setUp(self):
-        service = Service(CHROMEDRIVER)
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.headless = HEADLESS
-        # prevent CORS problems when using a localhost server
-        chrome_options.add_argument('--disable-web-security')
-        self.driver = webdriver.Chrome(service=service, options=chrome_options)
+        self.driver = setup_webdriver()
 
     def tearDown(self):
         self.driver.close()

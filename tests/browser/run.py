@@ -2,13 +2,12 @@
 import os
 import sys
 
-from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service
 
-from tests import CHROMEDRIVER, HEADLESS, SERVER_TIMEOUT
+from tests import SERVER_TIMEOUT
 from tests.utils.waiters import element_stays_the_same
+from tests.utils.webdriver import setup_webdriver
 
 RUNNER = os.path.join(os.path.dirname(__file__), 'SpecRunner.html')
 
@@ -84,10 +83,7 @@ def main():
 
     Will exit with a positive exit code on unit test failures
     """
-    service = Service(CHROMEDRIVER)
-    chrome_options = webdriver.ChromeOptions()
-    chrome_options.headless = HEADLESS
-    driver = webdriver.Chrome(service=service, options=chrome_options)
+    driver = setup_webdriver()
     try:
         driver.get('file://' + RUNNER)
         WebDriverWait(driver, SERVER_TIMEOUT).until(

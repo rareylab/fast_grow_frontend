@@ -51,7 +51,7 @@ class element_not_disabled:
 
     def __call__(self, driver):
         element = driver.find_element(*self.locator)
-        return element.get_attribute('disabled') is not None
+        return element.get_attribute('disabled') is None
 
 class js_returns_true:
     """Check JS returns true

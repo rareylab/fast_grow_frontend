@@ -15,7 +15,7 @@
     <table class="table">
       <thead>
       <tr>
-        <th>No.</th>
+        <th>No. <i class="bi bi-caret-down"></i></th>
         <th>Type</th>
         <th>Score</th>
       </tr>
