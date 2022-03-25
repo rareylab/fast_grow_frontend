@@ -6,4 +6,16 @@ export class Utils {
   static sleep (time) {
     return new Promise(resolve => setTimeout(resolve, time))
   }
+
+  static async pollUpload (model, pollUrl, interval = 1000, updateCallback = undefined) {
+    while (model.status === 'pending') {
+      await Utils.sleep(interval)
+      const response = await fetch(pollUrl + model.id)
+      model = await response.json()
+      if (updateCallback) {
+        updateCallback(model)
+      }
+    }
+    return model
+  }
 }

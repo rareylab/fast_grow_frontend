@@ -166,10 +166,10 @@
             aria-labelledby="upload-tab"
           >
             <structure-upload
-              @submit="this.structureUpload"
-              @change="this.structureSubmitError = undefined"
-              :submit-error="this.structureSubmitError"
               :polling-server="this.pollingServer"
+              :submit-error="this.structureUploadModel.structureSubmitError"
+              @submit="this.structureUpload"
+              @change="this.structureUploadModel.structureSubmitError = undefined"
             ></structure-upload>
           </div>
           <div
@@ -179,10 +179,10 @@
             aria-labelledby="ligands-tab"
           >
             <ligand-choice
+              :view="'ligands-tab'"
+              :ligands="this.structureUploadModel.ligands"
               @register="this.registerListener"
               @ligandChosen="this.ligandChosen"
-              :ligands="this.ligands"
-              :view="'ligands-tab'"
             ></ligand-choice>
           </div>
           <div
@@ -192,8 +192,8 @@
             aria-labelledby="pockets-tab"
           >
             <pocket-choice
+              :complexes="this.structureUploadModel.complexes"
               @pocketChosen="this.pocketChosen"
-              :complexes="this.complexes"
             ></pocket-choice>
           </div>
           <div
@@ -203,15 +203,15 @@
             aria-labelledby="cut-tab"
           >
             <cut
+              :view="'cut-tab'"
+              :polling-server="this.pollingServer"
+              :submit-error="this.cutModel.cutSubmitError"
+              :ligand="this.structureUploadModel.ligand"
+              ref="clip"
               @register="this.registerListener"
               @bondChosen="this.bondChosen"
               @cut="this.bondCut"
               @reset="this.coreReset"
-              :submit-error="this.cutSubmitError"
-              :polling-server="this.pollingServer"
-              :view="'cut-tab'"
-              :ligand="this.ligand"
-              ref="clip"
             ></cut>
           </div>
           <div
@@ -223,9 +223,9 @@
             <interaction-table
               :view="'ligand-interactions-tab'"
               :title="'Ligand'"
-              :interactions="this.ligandInteractions"
-              :loading="this.loadingInteractions"
-              :submit-error="this.interactionError"
+              :submit-error="this.interactionModel.interactionError"
+              :loading="this.interactionModel.loadingInteractions"
+              :interactions="this.interactionModel.ligandInteractions"
               @register="this.registerListener"
               @picked="this.ligandInteractionPicked"
             >
@@ -240,9 +240,9 @@
             <interaction-table
               :view="'water-interactions-tab'"
               :title="'Water'"
-              :interactions="this.waterInteractions"
-              :loading="this.loadingInteractions"
-              :submit-error="this.interactionError"
+              :submit-error="this.interactionModel.interactionError"
+              :loading="this.interactionModel.loadingInteractions"
+              :interactions="this.interactionModel.waterInteractions"
               @register="this.registerListener"
               @picked="this.waterInteractionPicked"
             >
@@ -256,9 +256,9 @@
           >
             <interaction-picker
               :view="'pocket-interactions-tab'"
-              :interactions="this.pocketInteractions"
-              :loading="this.loadingInteractions"
-              :submit-error="this.interactionError"
+              :interactions="this.interactionModel.pocketInteractions"
+              :loading="this.interactionModel.loadingInteractions"
+              :submit-error="this.interactionModel.interactionError"
               @register="this.registerListener"
               @change="this.toggleInteractionShadows"
               @picked="this.pocketInteractionPicked"
@@ -273,11 +273,11 @@
             aria-labelledby="query-tab"
           >
             <query
-              :submit-error="this.growSubmitError"
               :polling-server="this.pollingServer"
-              :fragment-sets="this.fragmentSets"
-              :complexes="this.complexes"
-              :core="this.core"
+              :submit-error="this.growingModel.growSubmitError"
+              :fragment-sets="this.growingModel.fragmentSets"
+              :complexes="this.structureUploadModel.complexes"
+              :core="this.cutModel.core"
               :interactions="this.interactionsArray"
               @grow="this.grow"
             ></query>
@@ -289,8 +289,8 @@
             aria-labelledby="query-tab"
           >
             <results
-              :hits="this.hitsArray"
               :loading="this.pollingServer"
+              :hits="this.growingModel.hitsArray"
               @picked="this.hitChosen"
             ></results>
           </div>
@@ -309,8 +309,6 @@ import _ from 'lodash'
 // internal imports
 import { NGLContext } from '@/NGLContext'
 import { Utils } from '@/utils/Utils'
-import { StructureUtils } from '@/utils/StructureUtils'
-import { GeometryUtils } from '@/utils/GeometryUtils'
 import { StructureUploadHandler } from '@/handlers/StructureUploadHandler'
 import { CutHandler } from '@/handlers/CutHandler'
 import { InteractionHandler } from '@/handlers/InteractionHandler'
@@ -333,7 +331,7 @@ const viewDefinition = {
     focus: ['ligand', 'ligands', 'ensemble']
   },
   'ligands-tab': {
-    // both ligands an ligand are visible so both the choices and the chosen are visible
+    // both ligands and ligand are visible so both the choices and the chosen are visible
     visible: ['ensemble', 'pocket', 'ligands', 'ligand'],
     focus: ['ligand', 'ligands', 'pocket']
   },
@@ -382,35 +380,43 @@ export default {
   data () {
     return {
       // status defining variables
-      structureSubmitError: undefined,
-      cutSubmitError: undefined,
-      interactionError: undefined,
-      growSubmitError: undefined,
-      loadingInteractions: false,
       pollingServer: false,
       baseUrl: 'http://localhost:8000', // TODO edit in production
       // data variables
       // this state is duplicated from the nglContext because the Vue proxy breaks NGL components
-      ensemble: undefined,
-      ligands: undefined,
-      ligand: undefined,
-      complexes: undefined,
-      pocket: undefined,
-      bondMarker: undefined,
-      linker: undefined,
-      anchor: undefined,
-      core: undefined,
-      interaction: undefined,
-      ligandInteractions: undefined,
-      waterInteractions: undefined,
-      pocketInteractions: undefined,
-      residueToInteractions: undefined,
-      highlightedResidue: undefined,
       pickedInteractions: new Map(),
-      fragmentSets: undefined,
-      currentFragmentSet: undefined,
-      growing: undefined,
-      hits: new Map()
+      structureUploadModel: {
+        structureSubmitError: undefined,
+        ensemble: undefined,
+        complexes: undefined,
+        ligands: undefined,
+        ligand: undefined,
+        pocket: undefined
+      },
+      cutModel: {
+        cutSubmitError: undefined,
+        bondMarker: undefined,
+        linker: undefined,
+        anchor: undefined,
+        core: undefined
+      },
+      interactionModel: {
+        interactionError: undefined,
+        loadingInteractions: false,
+        currentInteractions: undefined,
+        ligandInteractions: undefined,
+        waterInteractions: undefined,
+        pocketInteractions: undefined,
+        residueToInteractions: undefined,
+        highlightedResidue: undefined
+      },
+      growingModel: {
+        growSubmitError: undefined,
+        fragmentSets: undefined,
+        currentFragmentSet: undefined,
+        hits: new Map(),
+        hitsArray: []
+      }
     }
   },
   watch: {
@@ -425,7 +431,7 @@ export default {
           if (pickedInteractionsComponent.interactions.has(key)) {
             continue
           }
-          // copy interaction because loading a Vue proxied object to the NGL throws errors
+          // copy interaction because loading a Vue proxied object into the NGL throws errors
           const loadedInteraction = _.clone(value)
           InteractionHandler.loadSearchPoint(loadedInteraction, this.stage, { opacity: 0.8 })
           pickedInteractionsComponent.interactions.set(key, loadedInteraction)
@@ -441,17 +447,11 @@ export default {
         }
       },
       deep: true
-    },
-    core () {
-      this.growSubmitError = ''
     }
   },
   computed: {
     interactionsArray () {
       return Array.from(this.pickedInteractions.values())
-    },
-    hitsArray () {
-      return Array.from(this.hits.values())
     }
   },
   methods: {
@@ -484,7 +484,6 @@ export default {
       }
     },
     async pollUpload (model, pollUrl, interval = 1000, updateCallback = undefined) {
-      this.pollingServer = true
       while (model.status === 'pending') {
         await Utils.sleep(interval)
         const response = await fetch(pollUrl + model.id)
@@ -493,120 +492,29 @@ export default {
           updateCallback(model)
         }
       }
-      this.pollingServer = false
       return model
     },
     async structureUpload (event) {
-      event.preventDefault()
-      if (!this.structureUploadHandler.validate(event)) {
-        return
-      }
-      const formData = this.structureUploadHandler.makeFormData(event)
-      try {
-        const response = await fetch(this.baseUrl + '/complex', {
-          method: 'post',
-          body: formData
-        })
-        let ensemble = await response.json()
-        ensemble = await this.pollUpload(ensemble, this.baseUrl + '/complex/')
-        await this.structureUploadHandler.load(ensemble)
-        if (this.ligand && this.pocket) {
-          this.changeTab('cut-tab-trigger')
-        } else if (this.ligand) {
-          this.changeTab('pockets-tab-trigger')
-        } else {
-          this.changeTab('ligands-tab-trigger')
-        }
-      } catch (error) {
-        console.error(error)
-        this.structureSubmitError = 'An error occurred while uploading the structure'
-        this.pollingServer = false
-      }
+      await this.structureUploadHandler.structureUpload(event, this.baseUrl)
     },
-    async ligandChosen (ligandId) {
-      const ligandComponent = this.componentCache.get('ligand_' + ligandId)
-      this.ligand = ligandComponent.structureModel
-      this.nglContext.registerReplaceComponent('ligand', ligandComponent)
-      this.nglContext.render()
+    ligandChosen (event) {
+      this.structureUploadHandler.ligandChosen(event)
     },
-    async pocketChosen (complexId) {
-      const complexComponent = this.componentCache.get('complex_' + complexId)
-      const complexRepresentations = complexComponent.structureModel.component.reprList
-      complexRepresentations.forEach((representation) => {
-        if (representation.name === 'pocketLicorice') {
-          complexComponent.structureModel.component.removeRepresentation(representation)
-        }
-      })
-      const pocketRepresentation =
-        StructureUtils.addPocket(this.ligand.component, complexComponent.structureModel.component)
-      this.pocket = complexComponent.structureModel
-      this.nglContext.registerReplaceComponent('pocket', pocketRepresentation)
-      this.nglContext.render()
+    pocketChosen (event) {
+      this.structureUploadHandler.pocketChosen(event)
     },
-    async bondChosen (anchor, linker) {
-      this.removeChosenBond()
-      this.anchor = anchor
-      this.linker = linker
-      const bondMarker =
-        GeometryUtils.makeExitBondMarker(this.stage, this.anchor.positionToArray(), this.linker.positionToArray())
-      this.nglContext.registerReplaceComponent('bondMarker', bondMarker)
-      this.bondMarker = bondMarker
-      this.nglContext.render()
-    },
-    removeChosenBond () {
-      if (this.bondMarker) {
-        this.nglContext.deregisterComponent('bondMarker')
-        this.stage.removeComponent(this.bondMarker)
-      }
-      this.anchor = undefined
-      this.linker = undefined
+    bondChosen (anchor, linker) {
+      this.cutHandler.bondChosen(anchor, linker)
     },
     async bondCut () {
-      if (!this.cutHandler.validate(this.$data)) {
-        this.cutSubmitError = 'Invalid anchor or linker'
-      }
-      try {
-        const response = await fetch(this.baseUrl + '/core', {
-          method: 'post',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(this.cutHandler.makeData(this.$data))
-        })
-        let core = await response.json()
-        core = await this.pollUpload(core, this.baseUrl + '/core/')
-        await this.cutHandler.load(core)
-        this.nglContext.render()
-      } catch (error) {
-        console.error(error)
-        this.cutSubmitError = 'An error occurred while cutting the structure'
-        this.pollingServer = false
-      }
+      const ligand = this.structureUploadModel.ligand
+      await this.cutHandler.bondCut(ligand, this.baseUrl)
     },
     coreReset () {
-      this.removeChosenBond()
-      if (this.core) {
-        this.nglContext.deregisterComponent('core')
-        this.stage.removeComponent(this.core)
-        this.nglContext.render()
-      }
+      this.cutHandler.coreReset()
     },
-    async updateInteractions (interaction) {
-      try {
-        this.loadingInteractions = true
-        const response = await fetch(this.baseUrl + '/interactions', {
-          method: 'post',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(interaction)
-        })
-        let searchPointData = await response.json()
-        searchPointData = await this.pollUpload(searchPointData, this.baseUrl + '/interactions/')
-        this.interactionHandler.load(interaction, searchPointData)
-        this.loadingInteractions = false
-        this.nglContext.render()
-      } catch (error) {
-        console.error(error)
-        this.interactionError = 'An error occurred while generating interactions'
-        this.loadingInteractions = false
-      }
+    async updateInteractions (interactions) {
+      await this.interactionHandler.updateInteractions(interactions, this.baseUrl)
     },
     ligandInteractionPicked (interactionID) {
       this.interactionPicked(interactionID, 'ligandInteractions')
@@ -639,82 +547,18 @@ export default {
       }
     },
     toggleInteractionShadows (_event) {
-      const pocketInteractionComponent = this.nglContext.components.get('pocketInteractions')
-      if (!pocketInteractionComponent) {
-        return
-      }
-      pocketInteractionComponent.toggleAllShadows()
-      this.nglContext.render()
+      this.interactionHandler.toggleInteractionShadows()
     },
-    toggleResidueShadows (residueName) {
-      const [residueType, chainName, residueNumber] = residueName.split('_')
-      if (residueType === 'HET' || !chainName || !residueNumber) {
-        return
-      }
-      const selection = ':' + chainName + ' and ' + residueNumber
-      const proteinComponent = this.nglContext.components.get('pocket').parent
-      const highlightRepresentation = StructureUtils.addPocketHighlight(proteinComponent, selection)
-      const replacedHighlight =
-        this.nglContext.registerReplaceComponent('pocketHighlight', highlightRepresentation)
-      proteinComponent.removeRepresentation(replacedHighlight)
-
-      // switch off former shadows
-      const interactionComponent = this.nglContext.components.get('pocketInteractions')
-      if (this.highlightedResidue) {
-        const formerInteractionIDs = this.residueToInteractions.get(this.highlightedResidue)
-        if (formerInteractionIDs) {
-          formerInteractionIDs.forEach((interactionID) => {
-            interactionComponent.disableShadow(interactionID)
-          })
-        }
-      }
-
-      // switch on current shadows
-      this.highlightedResidue = residueName
-      const interactionIDs = this.residueToInteractions.get(this.highlightedResidue)
-      if (interactionIDs) {
-        interactionIDs.forEach((interactionID) => {
-          interactionComponent.enableShadow(interactionID)
-        })
-      }
+    toggleResidueShadows (event) {
+      this.interactionHandler.toggleResidueShadows(event)
     },
     async grow (fragmentSetID) {
-      this.fragmentSets.some((fragmentSet) => {
-        if (fragmentSet.id === fragmentSetID) {
-          this.currentFragmentSet = fragmentSet
-          return true
-        }
-      })
-      try {
-        if (!this.growingHandler.validate()) {
-          return
-        }
-        const response = await fetch(this.baseUrl + '/growing', {
-          method: 'post',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(this.growingHandler.makeRequest())
-        })
-        let growing = await response.json()
-        // TODO switch to results after first results
-        this.changeTab('results-tab-trigger')
-        growing = await this.pollUpload(growing, this.baseUrl + '/growing/', 1000, (growing) => {
-          this.growingHandler.load(growing)
-        })
-        this.growingHandler.load(growing)
-      } catch (error) {
-        console.error(error)
-        this.growSubmitError = 'An error occurred during growing'
-        this.pollingServer = false
-      }
+      const ensemble = this.structureUploadModel.ensemble
+      const core = this.cutModel.core
+      await this.growingHandler.grow(core, ensemble, this.interactionsArray, fragmentSetID, this.baseUrl)
     },
-    async hitChosen (hitID) {
-      const hitProxy = this.hits.get(hitID)
-      if (!hitProxy) {
-        return
-      }
-      const hit = _.clone(hitProxy)
-      await this.growingHandler.loadHit(hit)
-      this.nglContext.render()
+    async hitChosen (event) {
+      await this.growingHandler.hitChosen(event)
     }
   },
   mounted () {
@@ -730,10 +574,10 @@ export default {
     this.componentCache = new Map()
 
     // handlers
-    this.structureUploadHandler = new StructureUploadHandler(this.nglContext, this.$data, this.componentCache)
-    this.cutHandler = new CutHandler(this.nglContext, this.$data, this.componentCache)
-    this.interactionHandler = new InteractionHandler(this.nglContext, this.$data, this.componentCache)
-    this.growingHandler = new GrowingHandler(this.nglContext, this.$data, this.componentCache)
+    this.structureUploadHandler = new StructureUploadHandler(this.nglContext, this.$data.structureUploadModel, this.componentCache)
+    this.cutHandler = new CutHandler(this.nglContext, this.$data.cutModel, this.componentCache)
+    this.interactionHandler = new InteractionHandler(this.nglContext, this.$data.interactionModel, this.componentCache)
+    this.growingHandler = new GrowingHandler(this.nglContext, this.$data.growingModel, this.componentCache)
 
     window.addEventListener('resize', () => {
       this.stage.viewer.handleResize()
@@ -746,15 +590,15 @@ export default {
 
     window.addEventListener('show.bs.tab', (event) => {
       const view = event.target.getAttribute('data-bs-target').slice(1)
-      if (view.includes('interactions') && this.ligand && this.pocket) {
-        const interaction = {
-          ligand_id: this.ligand.id,
-          complex_id: this.pocket.id
+      if (view.includes('interactions') && this.structureUploadModel.ligand && this.structureUploadModel.pocket) {
+        const interactions = {
+          ligand_id: this.structureUploadModel.ligand.id,
+          complex_id: this.structureUploadModel.pocket.id
         }
-        if (_.isEqual(this.interaction, interaction)) {
+        if (_.isEqual(this.interactionModel.currentInteractions, interactions)) {
           return
         }
-        this.updateInteractions(interaction)
+        this.updateInteractions(interactions)
       }
     })
 
@@ -762,8 +606,20 @@ export default {
       this.removeDerivedData(event.derivedFrom)
     })
 
+    window.addEventListener('pollingOn', () => {
+      this.pollingServer = true
+    })
+
+    window.addEventListener('pollingOff', () => {
+      this.pollingServer = false
+    })
+
+    window.addEventListener('changeTab', (event) => {
+      this.changeTab(event.detail.tabTrigger)
+    })
+
     fetch(this.baseUrl + '/fragments').then(async (response) => {
-      this.fragmentSets = await response.json()
+      this.growingModel.fragmentSets = await response.json()
     })
   }
 }

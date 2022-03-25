@@ -1,12 +1,34 @@
 import { GeometryUtils } from '@/utils/GeometryUtils'
 import { InteractionCollectionComponent } from '@/nglComponents/InteractionCollectionComponent'
 import { HiddenInteractionCollectionComponent } from '@/nglComponents/HiddenInteractionCollectionComponent'
+import { StructureUtils } from '@/utils/StructureUtils'
+import { Utils } from '@/utils/Utils'
 
 export class InteractionHandler {
-  constructor (nglContext, data, componentCache) {
+  constructor (nglContext, model, componentCache) {
     this.nglContext = nglContext
-    this.data = data
+    this.model = model
     this.componentCache = componentCache
+  }
+
+  async updateInteractions (interactions, baseUrl) {
+    try {
+      this.model.loadingInteractions = true
+      const response = await fetch(baseUrl + '/interactions', {
+        method: 'post',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(interactions)
+      })
+      let searchPointData = await response.json()
+      searchPointData = await Utils.pollUpload(searchPointData, baseUrl + '/interactions/')
+      this.load(interactions, searchPointData)
+      this.model.loadingInteractions = false
+      this.nglContext.render()
+    } catch (error) {
+      console.error(error)
+      this.model.interactionError = 'An error occurred while generating interactions'
+      this.model.loadingInteractions = false
+    }
   }
 
   load (interaction, searchPointData) {
@@ -17,7 +39,7 @@ export class InteractionHandler {
       searchPoint.source = 'Ligand'
     })
     this.nglContext.registerComponent('ligandInteractions', ligandInteractionsComponent)
-    this.data.ligandInteractions = Array.from(ligandInteractionsComponent.geometryMap.values())
+    this.model.ligandInteractions = Array.from(ligandInteractionsComponent.geometryMap.values())
     const waterInteractionsComponent = InteractionHandler.loadInteractions(
       searchPointData.data.waterSearchPoints,
       this.nglContext.stage,
@@ -27,8 +49,8 @@ export class InteractionHandler {
       searchPoint.source = 'Water'
     })
     this.nglContext.registerComponent('waterInteractions', waterInteractionsComponent)
-    this.data.waterInteractions = Array.from(waterInteractionsComponent.geometryMap.values())
-    this.data.interaction = interaction
+    this.model.waterInteractions = Array.from(waterInteractionsComponent.geometryMap.values())
+    this.model.currentInteractions = interaction
 
     searchPointData.data.activeSiteSearchPoints.searchPoints.forEach((searchPoint) => {
       searchPoint.source = 'Active Site'
@@ -39,8 +61,8 @@ export class InteractionHandler {
         this.nglContext.stage
       )
     this.nglContext.registerComponent('pocketInteractions', pocketInteractionsComponent)
-    this.data.residueToInteractions = residueToInteractions
-    this.data.pocketInteractions = Array.from(pocketInteractionsComponent.geometryMap.values())
+    this.model.residueToInteractions = residueToInteractions
+    this.model.pocketInteractions = Array.from(pocketInteractionsComponent.geometryMap.values())
   }
 
   static loadInteractions (ligandSearchPoints, stage, startIndex = 0) {
@@ -90,5 +112,47 @@ export class InteractionHandler {
       residueToInteractions.get(mapping[1]).push(index)
     })
     return [residueToInteractions, new HiddenInteractionCollectionComponent(residueSearchPoints.searchPoints)]
+  }
+
+  toggleInteractionShadows () {
+    const pocketInteractionComponent = this.nglContext.components.get('pocketInteractions')
+    if (!pocketInteractionComponent) {
+      return
+    }
+    pocketInteractionComponent.toggleAllShadows()
+    this.nglContext.render()
+  }
+
+  toggleResidueShadows (residueName) {
+    const [residueType, chainName, residueNumber] = residueName.split('_')
+    if (residueType === 'HET' || !chainName || !residueNumber) {
+      return
+    }
+    const selection = ':' + chainName + ' and ' + residueNumber
+    const proteinComponent = this.nglContext.components.get('pocket').parent
+    const highlightRepresentation = StructureUtils.addPocketHighlight(proteinComponent, selection)
+    const replacedHighlight =
+      this.nglContext.registerReplaceComponent('pocketHighlight', highlightRepresentation)
+    proteinComponent.removeRepresentation(replacedHighlight)
+
+    // switch off former shadows
+    const interactionComponent = this.nglContext.components.get('pocketInteractions')
+    if (this.model.highlightedResidue) {
+      const formerInteractionIDs = this.model.residueToInteractions.get(this.model.highlightedResidue)
+      if (formerInteractionIDs) {
+        formerInteractionIDs.forEach((interactionID) => {
+          interactionComponent.disableShadow(interactionID)
+        })
+      }
+    }
+
+    // switch on current shadows
+    this.model.highlightedResidue = residueName
+    const interactionIDs = this.model.residueToInteractions.get(this.model.highlightedResidue)
+    if (interactionIDs) {
+      interactionIDs.forEach((interactionID) => {
+        interactionComponent.enableShadow(interactionID)
+      })
+    }
   }
 }

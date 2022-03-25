@@ -1,12 +1,52 @@
 import { EnsembleComponent } from '@/nglComponents/EnsembleComponent'
 import { StructureUtils } from '@/utils/StructureUtils'
 import { StructureModelComponent } from '@/nglComponents/StructureModelComponent'
+import { Utils } from '@/utils/Utils'
 
 export class StructureUploadHandler {
-  constructor (nglContext, data, componentCache) {
+  constructor (nglContext, model, componentCache) {
     this.nglContext = nglContext
-    this.data = data
+    this.model = model
     this.componentCache = componentCache
+  }
+
+  async structureUpload (event, baseUrl = '') {
+    event.preventDefault()
+    if (!this.validate(event)) {
+      return
+    }
+    const formData = this.makeFormData(event)
+    try {
+      window.dispatchEvent(new CustomEvent('pollingOn', { bubbles: true }))
+      const response = await fetch(baseUrl + '/complex', {
+        method: 'post',
+        body: formData
+      })
+      let ensemble = await response.json()
+      ensemble = await Utils.pollUpload(ensemble, baseUrl + '/complex/')
+      window.dispatchEvent(new CustomEvent('pollingOff', { bubbles: true }))
+      await this.load(ensemble)
+      if (this.model.ligand && this.model.pocket) {
+        window.dispatchEvent(new CustomEvent('changeTab', {
+          bubbles: true,
+          detail: { tabTrigger: 'cut-tab-trigger' }
+        }))
+      } else if (this.model.ligand) {
+        window.dispatchEvent(new CustomEvent('changeTab', {
+          bubbles: true,
+          detail: { tabTrigger: 'pockets-tab-trigger' }
+        }))
+      } else {
+        window.dispatchEvent(new CustomEvent('changeTab', {
+          bubbles: true,
+          detail: { tabTrigger: 'ligands-tab-trigger' }
+        }))
+      }
+    } catch (error) {
+      console.error(error)
+      this.model.structureSubmitError = 'An error occurred while uploading the structure'
+      window.dispatchEvent(new CustomEvent('pollingOff', { bubbles: true }))
+    }
   }
 
   /**
@@ -17,7 +57,7 @@ export class StructureUploadHandler {
   validate (event) {
     const ensembleField = event.target.ensemble
     if (ensembleField.files.length < 1) {
-      this.data.structureSubmitError = 'At least 1 protein is required'
+      this.model.structureSubmitError = 'At least 1 protein is required'
       return false
     }
     return true
@@ -44,34 +84,30 @@ export class StructureUploadHandler {
   async load (ensemble) {
     // const catFound = new CustomEvent('remove', { derivedFrom: 'ligands' })
     // window.dispatchEvent(catFound)
-    this.data.ensemble = ensemble
+    this.model.ensemble = ensemble
 
-    const [complexRepresentations, ligandChoiceRepresentations, ligandComponents] =
-      await StructureUploadHandler.loadEnsemble(ensemble, this.nglContext.stage)
+    const [complexRepresentations, ligandChoiceRepresentations, ligandComponents] = await StructureUploadHandler.loadEnsemble(ensemble, this.nglContext.stage)
 
     const ensembleComponent = new EnsembleComponent(ensemble.complexes, complexRepresentations)
     this.nglContext.registerReplaceComponent('ensemble', ensembleComponent)
-    this.data.complexes = ensembleComponent.structureModels
+    this.model.complexes = ensembleComponent.structureModels
 
     const ligandsComponent = new EnsembleComponent(ensemble.ligands, ligandChoiceRepresentations)
     this.nglContext.registerReplaceComponent('ligands', ligandsComponent)
-    this.data.ligands = ligandsComponent.structureModels
+    this.model.ligands = ligandsComponent.structureModels
 
     if (ensemble.ligands.length === 1) {
       // TODO set ligand with linker to ligand
       this.nglContext.registerReplaceComponent('ligand', ligandComponents[0])
-      this.data.ligand = ligandComponents[0].structureModel
+      this.model.ligand = ligandComponents[0].structureModel
       if (ensemble.complexes.length === 1) {
-        const pocketRepresentation = StructureUtils.addPocket(
-          ligandComponents[0].structureModel.component,
-          ensemble.complexes[0].component
-        )
+        const pocketRepresentation = StructureUtils.addPocket(ligandComponents[0].structureModel.component, ensemble.complexes[0].component)
         this.nglContext.registerReplaceComponent('pocket', pocketRepresentation)
-        this.data.pocket = ensemble.complexes[0]
+        this.model.pocket = ensemble.complexes[0]
       }
     }
 
-    if (!this.data.ligand || !this.data.pocket) {
+    if (!this.model.ligand || !this.model.pocket) {
       this.cacheChoiceComponents(ensemble, complexRepresentations, ligandComponents)
     }
   }
@@ -102,8 +138,7 @@ export class StructureUploadHandler {
   static async loadEnsemble (ensemble, stage) {
     const structurePromises = []
     const complexRepresentations = StructureUploadHandler.loadComplexes(ensemble, stage, structurePromises)
-    const [ligandChoiceRepresentations, ligandComponents] =
-      StructureUploadHandler.loadLigands(ensemble, stage, structurePromises)
+    const [ligandChoiceRepresentations, ligandComponents] = StructureUploadHandler.loadLigands(ensemble, stage, structurePromises)
     await Promise.all(structurePromises)
     return [complexRepresentations, ligandChoiceRepresentations, ligandComponents]
   }
@@ -171,5 +206,32 @@ export class StructureUploadHandler {
       return first.file_string.length > second.file_string.length ? -1 : 1
     }
     return first.name < second.name ? -1 : 1
+  }
+
+  ligandChosen (ligandId) {
+    const ligandComponent = this.componentCache.get('ligand_' + ligandId)
+    if (!ligandComponent) {
+      return
+    }
+    this.model.ligand = ligandComponent.structureModel
+    this.nglContext.registerReplaceComponent('ligand', ligandComponent)
+    this.nglContext.render()
+  }
+
+  pocketChosen (complexId) {
+    const complexComponent = this.componentCache.get('complex_' + complexId)
+    if (!complexComponent) {
+      return
+    }
+    const complexRepresentations = complexComponent.structureModel.component.reprList
+    complexRepresentations.forEach((representation) => {
+      if (representation.name === 'pocketLicorice') {
+        complexComponent.structureModel.component.removeRepresentation(representation)
+      }
+    })
+    const pocketRepresentation = StructureUtils.addPocket(this.model.ligand.component, complexComponent.structureModel.component)
+    this.model.pocket = complexComponent.structureModel
+    this.nglContext.registerReplaceComponent('pocket', pocketRepresentation)
+    this.nglContext.render()
   }
 }

@@ -7,12 +7,12 @@
     </div>
     <div class="col-auto">
       <input
-          type="text"
-          id="anchor-field"
-          class="form-control"
-          name="anchor"
-          :value="anchorName"
-          readonly
+        type="text"
+        id="anchor-field"
+        class="form-control"
+        name="anchor"
+        :value="anchorName"
+        readonly
       >
     </div>
   </div>
@@ -25,28 +25,28 @@
     </div>
     <div class="col-auto">
       <input
-          type="text"
-          id="linker-field"
-          class="form-control"
-          name="linker"
-          :value="linkerName"
-          readonly
+        type="text"
+        id="linker-field"
+        class="form-control"
+        name="linker"
+        :value="linkerName"
+        readonly
       >
     </div>
   </div>
   <div class="mb-3 row">
     <div class="col-auto">
       <button
-          class="btn btn-primary"
-          id="clip-button"
-          @click="$emit('cut')"
-          v-bind:disabled="submitError || pollingServer"
+        class="btn btn-primary"
+        id="clip-button"
+        @click="$emit('cut')"
+        v-bind:disabled="submitError || pollingServer"
       >
         <span
-            class="spinner-grow spinner-grow-sm"
-            role="status"
-            v-bind:aria-hidden="!pollingServer"
-            v-if="pollingServer"
+          class="spinner-grow spinner-grow-sm"
+          role="status"
+          v-bind:aria-hidden="!pollingServer"
+          v-if="pollingServer"
         >
         </span>
         <span class="visually-hidden" v-if="pollingServer">Loading...</span>
@@ -125,7 +125,7 @@ export default {
       this.anchor = bond.atom1
       this.linker = bond.atom2
       if (bond.atom1.element === 'R#' ||
-          (bond.atom2.element === 'C' && bond.atom1.element !== 'C')) {
+        (bond.atom2.element === 'C' && bond.atom1.element !== 'C')) {
         this.anchor = bond.atom2
         this.linker = bond.atom1
       }

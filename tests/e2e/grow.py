@@ -11,7 +11,7 @@ from tests.utils.waiters import element_has_css_class, element_not_disabled, ele
 from tests.utils.webdriver import setup_webdriver
 
 
-class InteractionsTests(unittest.TestCase):
+class GrowingTests(unittest.TestCase):
     """growing tests"""
 
     def setUp(self):

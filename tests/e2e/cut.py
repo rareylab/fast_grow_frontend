@@ -55,4 +55,4 @@ class CutTests(unittest.TestCase):
         WebDriverWait(self.driver, SERVER_TIMEOUT).until(
             element_not_disabled((By.ID, 'clip-button')))
         # check that a core was set
-        WebDriverWait(self.driver, 5).until(js_returns_true('return app.$data.core !== undefined'))
+        WebDriverWait(self.driver, 5).until(js_returns_true('return app.$data.cutModel.core !== undefined'))
