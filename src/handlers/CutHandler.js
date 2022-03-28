@@ -10,6 +10,9 @@ export class CutHandler {
     this.componentCache = componentCache
   }
 
+  /**
+   * Remove the chose bond and its bond marker
+   */
   removeChosenBond () {
     if (this.model.bondMarker) {
       this.nglContext.deregisterComponent('bondMarker')
@@ -19,6 +22,11 @@ export class CutHandler {
     this.model.linker = undefined
   }
 
+  /**
+   * Choose a bond to cut by its two atoms
+   * @param {object} anchor last atom before the cut
+   * @param {object} linker first atom after the cut
+   */
   bondChosen (anchor, linker) {
     this.removeChosenBond()
     this.model.anchor = anchor
@@ -36,7 +44,7 @@ export class CutHandler {
   /**
    * Validate whether all cutting information has been set
    *
-   * We nee a ligand, an anchor, and linker to cut.
+   * We need a ligand, an anchor, and linker to cut.
    * @returns {boolean} is valid
    */
   validate (ligand) {
@@ -64,6 +72,11 @@ export class CutHandler {
     }
   }
 
+  /**
+   * Cut a chosen bond
+   * @param {object} ligand ligand to cut
+   * @param {string} baseUrl base url of the backend server
+   */
   async bondCut (ligand, baseUrl = '') {
     if (!this.validate(ligand)) {
       this.model.cutSubmitError = 'Invalid anchor or linker'
@@ -77,7 +90,7 @@ export class CutHandler {
         body: JSON.stringify(this.makeData(ligand))
       })
       let core = await response.json()
-      core = await Utils.pollUpload(core, baseUrl + '/core/')
+      core = await Utils.pollModel(core, baseUrl + '/core/')
       window.dispatchEvent(new CustomEvent('pollingOff', { bubbles: true }))
       await this.load(core)
       this.nglContext.render()
@@ -93,9 +106,6 @@ export class CutHandler {
    * @param {object} coreModel core model to load
    */
   async load (coreModel) {
-    // const catFound = new CustomEvent('remove', { derivedFrom: 'core' })
-    // window.dispatchEvent(catFound)
-
     const coreComponent = await StructureUtils.addStructure(this.nglContext.stage, coreModel)
     coreModel.component = coreComponent
     const coreRepresentation = coreComponent.addRepresentation('licorice', {
@@ -107,9 +117,13 @@ export class CutHandler {
     this.nglContext.registerReplaceComponent('core', core)
   }
 
+  /**
+   * Remove the core and the chosen bond, reseting everything to the ligand
+   */
   coreReset () {
     this.removeChosenBond()
     if (this.model.core) {
+      this.model.core = undefined
       this.nglContext.deregisterComponent('core')
       this.nglContext.stage.removeComponent(this.model.core)
       this.nglContext.render()

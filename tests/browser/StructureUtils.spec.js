@@ -3,6 +3,7 @@ import { expect } from 'chai'
 import * as NGL from 'ngl'
 import { StructureUtils } from '@/utils/StructureUtils'
 import { TestData } from '../test_files/TestData'
+import _ from 'lodash'
 
 describe('StructureUtils', () => {
   let stage
@@ -28,23 +29,23 @@ describe('StructureUtils', () => {
   })
 
   it('adds a molecule structure', async function () {
-    const componentPromise = StructureUtils.addStructure(stage, TestData.molecule)
+    const componentPromise = StructureUtils.addStructure(stage, _.cloneDeep(TestData.molecule))
     await componentPromise
     expect(stage.compList.length).to.equal(1)
     expect(stage.compList[0].name).to.equal(TestData.molecule.name)
   })
 
   it('adds a protein structure', async function () {
-    const componentPromise = StructureUtils.addStructure(stage, TestData.protein)
+    const componentPromise = StructureUtils.addStructure(stage, _.cloneDeep(TestData.protein))
     await componentPromise
     expect(stage.compList.length).to.equal(1)
     expect(stage.compList[0].name).to.equal(TestData.protein.name)
   })
 
   it('gets active atoms', async function () {
-    const ligandPromise = StructureUtils.addStructure(stage, TestData.molecule)
+    const ligandPromise = StructureUtils.addStructure(stage, _.cloneDeep(TestData.molecule))
     await ligandPromise
-    const proteinPromise = StructureUtils.addStructure(stage, TestData.protein)
+    const proteinPromise = StructureUtils.addStructure(stage, _.cloneDeep(TestData.protein))
     await proteinPromise
     const [ligandComponent, proteinComponent] = stage.compList
     const activeSiteAtoms = StructureUtils.getActiveSiteAtoms(ligandComponent, proteinComponent, 10)
@@ -53,9 +54,9 @@ describe('StructureUtils', () => {
   })
 
   it('get active residues and waters', async function () {
-    const ligandPromise = StructureUtils.addStructure(stage, TestData.molecule)
+    const ligandPromise = StructureUtils.addStructure(stage, _.cloneDeep(TestData.molecule))
     await ligandPromise
-    const proteinPromise = StructureUtils.addStructure(stage, TestData.protein)
+    const proteinPromise = StructureUtils.addStructure(stage, _.cloneDeep(TestData.protein))
     await proteinPromise
     const [ligandComponent, proteinComponent] = stage.compList
     const activeSiteAtoms = StructureUtils.getActiveSiteAtoms(ligandComponent, proteinComponent, 10)
@@ -67,7 +68,7 @@ describe('StructureUtils', () => {
   })
 
   it('detects a bond in the same ring', async function () {
-    const ligandPromise = StructureUtils.addStructure(stage, TestData.bridgedRingMolecule)
+    const ligandPromise = StructureUtils.addStructure(stage, _.cloneDeep(TestData.bridgedRingMolecule))
     await ligandPromise
     const structure = stage.compList[0].structure
     // in same ring

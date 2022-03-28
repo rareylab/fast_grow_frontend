@@ -1,6 +1,6 @@
 import { GeometryUtils } from '@/utils/GeometryUtils'
-import { InteractionCollectionComponent } from '@/nglComponents/InteractionCollectionComponent'
-import { HiddenInteractionCollectionComponent } from '@/nglComponents/HiddenInteractionCollectionComponent'
+import { InteractionsComponent } from '@/nglComponents/InteractionsComponent'
+import { HiddenInteractionsComponent } from '@/nglComponents/HiddenInteractionsComponent'
 import { StructureUtils } from '@/utils/StructureUtils'
 import { Utils } from '@/utils/Utils'
 
@@ -11,6 +11,11 @@ export class InteractionHandler {
     this.componentCache = componentCache
   }
 
+  /**
+   * Update interaction information
+   * @param {object} interactions the protein-ligand interaction pair
+   * @param {string} baseUrl base URL of the backend server
+   */
   async updateInteractions (interactions, baseUrl) {
     try {
       this.model.loadingInteractions = true
@@ -20,7 +25,7 @@ export class InteractionHandler {
         body: JSON.stringify(interactions)
       })
       let searchPointData = await response.json()
-      searchPointData = await Utils.pollUpload(searchPointData, baseUrl + '/interactions/')
+      searchPointData = await Utils.pollModel(searchPointData, baseUrl + '/interactions/')
       this.load(interactions, searchPointData)
       this.model.loadingInteractions = false
       this.nglContext.render()
@@ -31,7 +36,12 @@ export class InteractionHandler {
     }
   }
 
-  load (interaction, searchPointData) {
+  /**
+   * Load search point data for a protein-ligand interaction
+   * @param {object} interactions the protein-ligand interaction pair
+   * @param {object} searchPointData search point data to load
+   */
+  load (interactions, searchPointData) {
     const ligandInteractionsComponent = InteractionHandler.loadInteractions(
       searchPointData.data.ligandSearchPoints,
       this.nglContext.stage)
@@ -50,7 +60,7 @@ export class InteractionHandler {
     })
     this.nglContext.registerComponent('waterInteractions', waterInteractionsComponent)
     this.model.waterInteractions = Array.from(waterInteractionsComponent.geometryMap.values())
-    this.model.currentInteractions = interaction
+    this.model.currentInteractions = interactions
 
     searchPointData.data.activeSiteSearchPoints.searchPoints.forEach((searchPoint) => {
       searchPoint.source = 'Active Site'
@@ -65,11 +75,23 @@ export class InteractionHandler {
     this.model.pocketInteractions = Array.from(pocketInteractionsComponent.geometryMap.values())
   }
 
-  static loadInteractions (ligandSearchPoints, stage, startIndex = 0) {
-    InteractionHandler.loadSearchPoints(ligandSearchPoints, stage, startIndex)
-    return new InteractionCollectionComponent(ligandSearchPoints)
+  /**
+   * Load two-point interactions
+   * @param {Array<object>} searchPoints list of search points
+   * @param {object} stage NGL stage
+   * @param {integer} startIndex start index for interaction numbering
+   */
+  static loadInteractions (searchPoints, stage, startIndex = 0) {
+    InteractionHandler.loadSearchPoints(searchPoints, stage, startIndex)
+    return new InteractionsComponent(searchPoints)
   }
 
+  /**
+   * Load search points
+   * @param {Array<object>} searchPoints search points to load
+   * @param {object} stage NGL stage
+   * @param {integer} startIndex start index for interaction numbering
+   */
   static loadSearchPoints (searchPoints, stage, startIndex = 0) {
     searchPoints.forEach((searchPoint, index) => {
       this.loadSearchPoint(searchPoint, stage)
@@ -77,6 +99,12 @@ export class InteractionHandler {
     })
   }
 
+  /**
+   * Load a search point
+   * @param {object} searchPoint search point to load
+   * @param {object} stage NGL Stage
+   * @param {object} options options to pass through to NGL
+   */
   static loadSearchPoint (searchPoint, stage, options = {}) {
     if (searchPoint.ligandInteraction) {
       if (searchPoint.ligandInteraction.type === 'ACCEPTOR' ||
@@ -95,6 +123,12 @@ export class InteractionHandler {
     }
   }
 
+  /**
+   * Load interactions associated with residues
+   * @param {object} residueSearchPoints  residue search point mapping
+   * @param {object} stage NGL stage
+   * @param {integer} startIndex start index for interaction numbering
+   */
   static loadResidueInteractions (residueSearchPoints, stage, startIndex = 0) {
     InteractionHandler.loadSearchPoints(residueSearchPoints.searchPoints, stage, startIndex)
     const residueToInteractions = new Map()
@@ -111,9 +145,12 @@ export class InteractionHandler {
       }
       residueToInteractions.get(mapping[1]).push(index)
     })
-    return [residueToInteractions, new HiddenInteractionCollectionComponent(residueSearchPoints.searchPoints)]
+    return [residueToInteractions, new HiddenInteractionsComponent(residueSearchPoints.searchPoints)]
   }
 
+  /**
+   * Toggle all interaction shadows
+   */
   toggleInteractionShadows () {
     const pocketInteractionComponent = this.nglContext.components.get('pocketInteractions')
     if (!pocketInteractionComponent) {
@@ -123,6 +160,10 @@ export class InteractionHandler {
     this.nglContext.render()
   }
 
+  /**
+   * Toggle interaction shadows for a residue
+   * @param {string} residueName name of the residue to toggle shadows for
+   */
   toggleResidueShadows (residueName) {
     const [residueType, chainName, residueNumber] = residueName.split('_')
     if (residueType === 'HET' || !chainName || !residueNumber) {

@@ -6,14 +6,14 @@ export class MockStage {
     this.signals = {
       clicked: new Set()
     }
-    this.components = []
+    this.components = new Set()
   }
 
   loadFile () {
     return new Promise((resolve) => {
       setTimeout(() => {
         const component = new MockComponent()
-        this.components.push(component)
+        this.components.add(component)
         resolve(component)
       }, 100)
     })
@@ -21,8 +21,12 @@ export class MockStage {
 
   addComponentFromObject (_object) {
     const component = new MockComponent()
-    this.components.push(component)
+    this.components.add(component)
     return component
+  }
+
+  removeComponent (component) {
+    this.components.delete(component)
   }
 }
 
@@ -48,6 +52,7 @@ export class MockRepresentation {
   constructor (component) {
     this.parent = component
     this.parameters = { opacity: 0 }
+    this.visible = false
   }
 
   getParameters () {
@@ -56,6 +61,10 @@ export class MockRepresentation {
 
   setParameters (parameters) {
     this.parameters = parameters
+  }
+
+  setVisibility (value) {
+    this.visible = value
   }
 }
 

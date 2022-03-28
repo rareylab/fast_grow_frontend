@@ -3,8 +3,8 @@
     <h2>Choose Pocket Interactions</h2>
     <p v-if="this.loading">
       <span
-          class="spinner-grow spinner-grow-sm"
-          role="status"
+        class="spinner-grow spinner-grow-sm"
+        role="status"
       >
       </span>
       Loading...
@@ -14,10 +14,10 @@
   <div class="table-field" ref="table-field">
     <div class="form-check">
       <input
-          class="form-check-input"
-          type="checkbox"
-          id="shadow-check"
-          @change="$emit('change', $event)"
+        class="form-check-input"
+        type="checkbox"
+        id="shadow-check"
+        @change="$emit('change', $event)"
       >
       <label class="form-check-label" for="shadow-check" id="shadow-check-label">
         Show all interaction shadows
@@ -64,6 +64,10 @@ export default {
     }
   },
   computed: {
+    /**
+     * Compute an array of interactions sorted by ID
+     * @returns {Array<object>} interactions sorted by ID
+     */
     sortedInteractions () {
       const interactions = this.pickedInteractions === undefined ? [] : Array.from(this.pickedInteractions.values())
       interactions.sort(this.compareID)
@@ -71,12 +75,22 @@ export default {
     }
   },
   methods: {
+    /**
+     * sorting by ascending ID
+     * @param {object} first first element with ID
+     * @param {object} second second element with ID
+     * @returns {number} result of the comparison
+     */
     compareID (first, second) {
       if (first.id < second.id) {
         return -1
       }
       return 1
     },
+    /**
+     * Handle a clicked interaction
+     * @param {object} pickingProxy clicked interaction
+     */
     interactionClicked (pickingProxy) {
       if (!pickingProxy || !pickingProxy.sphere) {
         return
@@ -99,19 +113,37 @@ export default {
         this.addInteraction(pickedInteraction)
       }
     },
+    /**
+     * Remove an interaction row from the picked interactions
+     * @param {Event} event row clicked event
+     */
     removeRow (event) {
       const row = event.target.parentElement.parentElement
       const interactionID = parseInt(row.children[0].textContent)
       this.removeInteraction(interactionID)
     },
+    /**
+     * Remove an interaction
+     * @param {integer} interactionID ID of an interaction
+     */
     removeInteraction (interactionID) {
-      this.pickedInteractions.delete(interactionID)
-      this.$emit('picked', interactionID)
+      if (this.pickedInteractions.has(interactionID)) {
+        this.pickedInteractions.delete(interactionID)
+        this.$emit('picked', interactionID)
+      }
     },
+    /**
+     * Add an interaction
+     * @param {object} interaction interaction to add
+     */
     addInteraction (interaction) {
       this.pickedInteractions.set(interaction.id, interaction)
       this.$emit('picked', interaction.id)
     },
+    /**
+     * Handle a residue highlight
+     * @param {object} pickingProxy clicked residue
+     */
     residueHighlighted (pickingProxy) {
       if (!pickingProxy) {
         return

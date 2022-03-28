@@ -6,35 +6,35 @@
     <div class="mb-3">
       <label for="protein-file-field" class="form-label">Protein/Ensemble</label>
       <input
-          class="form-control"
-          type="file"
-          name="ensemble"
-          id="protein-file-field"
-          @change="proteinFileCheck"
-          multiple
+        class="form-control"
+        type="file"
+        name="ensemble"
+        id="protein-file-field"
+        @change="proteinFileCheck"
+        multiple
       >
     </div>
     <div class="mb-3">
       <label for="ligand-file-field" class="form-label">Ligand</label>
       <input
-          class="form-control"
-          type="file"
-          name="ligand"
-          id="ligand-file-field"
-          @change="ligandFileCheck"
+        class="form-control"
+        type="file"
+        name="ligand"
+        id="ligand-file-field"
+        @change="ligandFileCheck"
       >
     </div>
     <button
-        type="submit"
-        class="btn btn-primary"
-        id="structure-upload-button"
-        v-bind:disabled="formError || submitError || pollingServer"
+      type="submit"
+      class="btn btn-primary"
+      id="structure-upload-button"
+      v-bind:disabled="formError || submitError || pollingServer"
     >
       <span
-          class="spinner-grow spinner-grow-sm"
-          role="status"
-          v-bind:aria-hidden="!pollingServer"
-          v-if="pollingServer"
+        class="spinner-grow spinner-grow-sm"
+        role="status"
+        v-bind:aria-hidden="!pollingServer"
+        v-if="pollingServer"
       ></span>
       <span class="visually-hidden" v-if="pollingServer">Loading...</span>
       Upload
@@ -59,7 +59,7 @@ export default {
   methods: {
     /**
      * Check file size and type of protein files
-     * @param event change event
+     * @param {Event} event change event
      */
     proteinFileCheck (event) {
       if (event.target.files.length > 5) {
@@ -81,8 +81,8 @@ export default {
     },
 
     /**
-     * Check file size and type of a ligand file
-     * @param event change event
+     * Check file size and type of ligand file
+     * @param {Event} event change event
      */
     ligandFileCheck (event) {
       const file = event.target.files[0]

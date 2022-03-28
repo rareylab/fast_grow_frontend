@@ -145,6 +145,12 @@ export class StructureUtils {
     return [activeAtomSet, activeWaterSet]
   }
 
+  /**
+   * Check if a structure contains an atom
+   * @param {object} structure structure to check in
+   * @param {object} atom atom to check for
+   * @returns {boolean} atom is in structure
+   */
   static structureContainsAtom (structure, atom) {
     if (atom.structure.name !== structure.name) {
       return false
@@ -156,6 +162,12 @@ export class StructureUtils {
     return retrievedAtom.atomname === atom.atomname
   }
 
+  /**
+   * Check if a structure contains a bond
+   * @param {object} structure structure to check in
+   * @param {object} bond bond to check for
+   * @returns {boolean} bond is in structure
+   */
   static structureContainsBond (structure, bond) {
     return StructureUtils.structureContainsAtom(structure, bond.atom1) &&
       StructureUtils.structureContainsAtom(structure, bond.atom2)
@@ -163,7 +175,7 @@ export class StructureUtils {
 
   /**
    * Check if the atoms of a bond are in the same ring.
-   * @param bond
+   * @param {object} bond bond to check the atoms of
    * @return {boolean} in the same ring
    */
   static inSameRing (bond) {
@@ -176,6 +188,9 @@ export class StructureUtils {
     })
   }
 
+  /**
+   * Pink carbons
+   */
   static pocketHighlight = NGL.ColormakerRegistry.addSelectionScheme([
     ['pink', '_C'],
     ['red', '_O'],
@@ -184,6 +199,12 @@ export class StructureUtils {
     ['orange', '_Se']
   ], 'pocketHighlight')
 
+  /**
+   * Add a highlight to a protein pocket
+   * @param proteinComponent
+   * @param selection
+   * @returns {*}
+   */
   static addPocketHighlight (proteinComponent, selection) {
     return proteinComponent.addRepresentation('licorice', {
       sele: selection,

@@ -10,6 +10,12 @@ export class GrowingHandler {
     this.componentCache = componentCache
   }
 
+  /**
+   * Validate whether all growing information is present
+   * @param {object} ensemble ensemble to grow in
+   * @param {object} core core to grow from
+   * @returns {boolean} is valid
+   */
   validate (ensemble, core) {
     if (!ensemble) {
       this.model.growSubmitError = 'No structure data'
@@ -26,6 +32,13 @@ export class GrowingHandler {
     return true
   }
 
+  /**
+   * Make the growing request body
+   * @param {object} ensemble ensemble to grow in
+   * @param {object} core core to grow from
+   * @param {Array<object>} interactions interactions to use as constraints
+   * @returns {object} growing request body
+   */
   makeRequest (ensemble, core, interactions) {
     const request = {
       ensemble: ensemble.id,
@@ -38,6 +51,12 @@ export class GrowingHandler {
     return request
   }
 
+  /**
+   * Generate the search point query
+   * @param {Array<object>} interactions interactions to convert to search points
+   * @param {number} radius radius of the search points
+   * @returns {object} search point query
+   */
   static makeSearchPointQuery (interactions, radius = 3.0) {
     if (interactions.length === 0) {
       return undefined
@@ -45,6 +64,12 @@ export class GrowingHandler {
     return this.makeSearchPointQueryRecursive(interactions, radius)
   }
 
+  /**
+   * Recursive search point query generation
+   * @param {Array<object>} interactions list of interactions
+   * @param {number} radius radius of the search points
+   * @returns {object} search point query
+   */
   static makeSearchPointQueryRecursive (interactions, radius) {
     if (interactions.length === 1) {
       return {
@@ -64,6 +89,14 @@ export class GrowingHandler {
     }
   }
 
+  /**
+   * Grow a from a query
+   * @param {object} core core to grow from
+   * @param {object} ensemble ensemble of complexes to grow in
+   * @param {Array<object>} interactions interactions to use as constraints
+   * @param {integer} fragmentSetID ID of the fragment set to use
+   * @param {string} baseUrl base URL of the backend server
+   */
   async grow (core, ensemble, interactions, fragmentSetID, baseUrl) {
     this.model.fragmentSets.some((fragmentSet) => {
       if (fragmentSet.id === fragmentSetID) {
@@ -87,7 +120,7 @@ export class GrowingHandler {
         bubbles: true,
         detail: { tabTrigger: 'results-tab-trigger' }
       }))
-      growing = await Utils.pollUpload(growing, baseUrl + '/growing/', 1000, (growing) => {
+      growing = await Utils.pollModel(growing, baseUrl + '/growing/', 1000, (growing) => {
         this.load(growing)
       })
       this.load(growing)
@@ -100,6 +133,10 @@ export class GrowingHandler {
     }
   }
 
+  /**
+   * Load the data of a growing, mostly the hits
+   * @param {object} growing growing to load
+   */
   load (growing) {
     this.model.growing = growing
     if (growing.hits) {
@@ -118,6 +155,10 @@ export class GrowingHandler {
     }
   }
 
+  /**
+   * Pick a hit to show
+   * @param {integer} hitID
+   */
   async hitChosen (hitID) {
     const hitProxy = this.model.hits.get(hitID)
     if (!hitProxy) {
@@ -128,6 +169,10 @@ export class GrowingHandler {
     this.nglContext.render()
   }
 
+  /**
+   * Load a hit
+   * @param {object} hit
+   */
   async loadHit (hit) {
     const currentHitComponent = this.nglContext.components.get('hit')
     if (currentHitComponent && currentHitComponent.structureModel.id === hit.id) {

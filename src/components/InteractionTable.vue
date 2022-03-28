@@ -3,8 +3,8 @@
     <h2>Choose {{ this.title }} Interactions</h2>
     <p v-if="this.loading">
       <span
-          class="spinner-grow spinner-grow-sm"
-          role="status"
+        class="spinner-grow spinner-grow-sm"
+        role="status"
       >
       </span>
       Loading...
@@ -45,6 +45,10 @@ export default {
     submitError: String
   },
   computed: {
+    /**
+     * Compute an array of interactions sorted by ID
+     * @returns {Array<object>} interactions sorted by ID
+     */
     sortedInteractions () {
       const interactions = this.interactions === undefined ? [] : this.interactions.slice()
       interactions.sort(this.compareID)
@@ -66,12 +70,22 @@ export default {
       tableField.style.height = 0 + 'px' // reduce height to avoid changing parent height
       tableField.style.height = (tableField.parentElement.clientHeight - header.clientHeight - margin) + 'px'
     },
+    /**
+     * sorting by ascending ID
+     * @param {object} first first element with ID
+     * @param {object} second second element with ID
+     * @returns {number} result of the comparison
+     */
     compareID (first, second) {
       if (first.id < second.id) {
         return -1
       }
       return 1
     },
+    /**
+     * Apply a clicked interation row
+     * @param row interaction row
+     */
     applyRow (row) {
       const rowID = row.children[0].textContent
       this.$emit('picked', parseInt(rowID))
@@ -81,6 +95,10 @@ export default {
         row.classList.add('highlighted')
       }
     },
+    /**
+     * Handle a clicked interaction
+     * @param {objects} pickingProxy clicked interaction
+     */
     interactionClicked (pickingProxy) {
       if (!pickingProxy || (!pickingProxy.cylinder && !pickingProxy.sphere)) {
         return

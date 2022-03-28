@@ -51,6 +51,10 @@ export default {
     }
   },
   computed: {
+    /**
+     * Compute a list of hits sorted by score
+     * @returns {Array<object>}
+     */
     sortedHits () {
       if (!this.hits || this.hits.length === 0) {
         return []
@@ -108,6 +112,10 @@ export default {
       tableField.style.height = 0 + 'px' // reduce height to avoid changing parent height
       tableField.style.height = (tableField.parentElement.clientHeight - title.clientHeight - margin) + 'px'
     },
+    /**
+     * Apply a hit row
+     * @param row hit row
+     */
     applyRow (row) {
       const rowID = parseInt(row.children[0].textContent)
       this.currentHitID = rowID

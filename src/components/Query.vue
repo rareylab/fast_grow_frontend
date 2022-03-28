@@ -6,9 +6,9 @@
       <label for="query-fragment-set" class="form-label">Fragment Set</label>
       <select id="query-fragment-set" name="fragment-sets" class="form-select">
         <option
-            v-for="fragmentSet in this.fragmentSets"
-            :key="fragmentSet.id"
-            :value="fragmentSet.id"
+          v-for="fragmentSet in this.fragmentSets"
+          :key="fragmentSet.id"
+          :value="fragmentSet.id"
         >{{ fragmentSet.name }}
         </option>
       </select>
@@ -34,12 +34,12 @@
     <div class="mb-3">
       <label for="query-core" class="form-label">Core</label>
       <input
-          class="form-control"
-          type="text"
-          name="core"
-          id="query-core"
-          :value="this.coreName"
-          disabled
+        class="form-control"
+        type="text"
+        name="core"
+        id="query-core"
+        :value="this.coreName"
+        disabled
       >
     </div>
     <div class="mb-3">
@@ -64,16 +64,16 @@
     </div>
     <div class="mb-3">
       <button
-          class="btn btn-primary"
-          id="grow-button"
-          @click="this.submit"
-          v-bind:disabled="submitError || pollingServer"
+        class="btn btn-primary"
+        id="grow-button"
+        @click="this.submit"
+        v-bind:disabled="submitError || pollingServer"
       >
         <span
-            class="spinner-grow spinner-grow-sm"
-            role="status"
-            v-bind:aria-hidden="!pollingServer"
-            v-if="pollingServer"
+          class="spinner-grow spinner-grow-sm"
+          role="status"
+          v-bind:aria-hidden="!pollingServer"
+          v-if="pollingServer"
         >
         </span>
         <span class="visually-hidden" v-if="pollingServer">Loading...</span>
@@ -91,6 +91,10 @@ export default {
     coreName () {
       return this.core ? this.core.name : ''
     },
+    /**
+     * Compute a list of interactions sorted by source
+     * @returns {Array<object>}
+     */
     sortedInteractions () {
       const sortedInteractions = this.interactions === undefined ? [] : this.interactions.slice()
       sortedInteractions.sort((interaction, otherInteraction) => {

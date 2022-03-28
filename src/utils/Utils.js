@@ -7,7 +7,15 @@ export class Utils {
     return new Promise(resolve => setTimeout(resolve, time))
   }
 
-  static async pollUpload (model, pollUrl, interval = 1000, updateCallback = undefined) {
+  /**
+   * Poll the status of a model until it is not 'pending anymore'
+   * @param {object} model model to poll
+   * @param {string} pollUrl URL to poll
+   * @param interval time to wait in betweens polls
+   * @param updateCallback function to call after every update of the model
+   * @returns {Promise<object>} non-pending model
+   */
+  static async pollModel (model, pollUrl, interval = 1000, updateCallback = undefined) {
     while (model.status === 'pending') {
       await Utils.sleep(interval)
       const response = await fetch(pollUrl + model.id)

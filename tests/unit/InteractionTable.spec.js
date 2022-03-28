@@ -1,73 +1,12 @@
 import { expect } from 'chai'
 import { shallowMount } from '@vue/test-utils'
 import LigandInteractions from '@/components/InteractionTable'
+import { TestData } from '../test_files/TestData'
 
 describe('InteractionTable', () => {
   it('applies a clicked row', async () => {
-    const interactions = [
-      {
-        id: 0,
-        ligandInteraction: {
-          position: [
-            -20.499,
-            24.1,
-            -25.774
-          ],
-          type: 'ACCEPTOR'
-        },
-        score: 0.11417357582581605,
-        siteInteraction: {
-          position: [
-            -17.618,
-            26.215,
-            -26.535
-          ],
-          type: 'DONOR'
-        }
-      },
-      {
-        id: 1,
-        ligandInteraction: {
-          position: [
-            -23.915,
-            25.22,
-            -28.609
-          ],
-          type: 'DONOR'
-        },
-        score: 0.7019329651758045,
-        siteInteraction: {
-          position: [
-            -26.813,
-            25.672,
-            -29.377
-          ],
-          type: 'ACCEPTOR'
-        }
-      },
-      {
-        id: 2,
-        ligandInteraction: {
-          position: [
-            -23.915,
-            25.22,
-            -28.609
-          ],
-          type: 'DONOR'
-        },
-        score: 0.028332915991302356,
-        siteInteraction: {
-          position: [
-            -26.813,
-            25.672,
-            -29.377
-          ],
-          type: 'ACCEPTOR'
-        }
-      }
-    ]
     const wrapper = shallowMount(LigandInteractions, {
-      props: { interactions: interactions }
+      props: { interactions: TestData.interactions }
     })
     const tableData = wrapper.findAll('td')
     await tableData[0].trigger('click')

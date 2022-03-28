@@ -2214,4 +2214,199 @@ export class TestData {
       }
     ]
   }
+
+  static interactions = [
+    {
+      id: 0,
+      ligandInteraction: {
+        position: [
+          -20.499,
+          24.1,
+          -25.774
+        ],
+        type: 'ACCEPTOR'
+      },
+      score: 0.11417357582581605,
+      siteInteraction: {
+        position: [
+          -17.618,
+          26.215,
+          -26.535
+        ],
+        type: 'DONOR'
+      }
+    },
+    {
+      id: 1,
+      ligandInteraction: {
+        position: [
+          -23.915,
+          25.22,
+          -28.609
+        ],
+        type: 'DONOR'
+      },
+      score: 0.7019329651758045,
+      siteInteraction: {
+        position: [
+          -26.813,
+          25.672,
+          -29.377
+        ],
+        type: 'ACCEPTOR'
+      }
+    },
+    {
+      id: 2,
+      ligandInteraction: {
+        position: [
+          -23.915,
+          25.22,
+          -28.609
+        ],
+        type: 'DONOR'
+      },
+      score: 0.028332915991302356,
+      siteInteraction: {
+        position: [
+          -26.813,
+          25.672,
+          -29.377
+        ],
+        type: 'ACCEPTOR'
+      }
+    }
+  ]
+
+  static core = {
+    id: 187,
+    ligand_id: 986,
+    name: '7A4R_1_8_2',
+    anchor: 8,
+    linker: 2,
+    status: 'success',
+    file_type: 'sdf',
+    file_string: 'QY8_A_501\n          03282212213D 1   1.00000     0.00000     0\n            \n 15 16  0  0  0  0            999 V2000\n  -20.4990   24.1000  -25.7740 O   0  0  0  0  0  0  0  0  0  0  0  0\n  -23.9150   25.2200  -28.6090 N   0  0  0  0  0  0  0  0  0  0  0  0\n  -22.2750   22.6450  -26.0490 N   0  0  0  0  0  0  0  0  0  0  0  0\n  -24.1440   23.0900  -27.4640 N   0  0  0  0  0  0  0  0  0  0  0  0\n  -22.9920   26.2520  -28.5790 C   0  0  0  0  0  0  0  0  0  0  0  0\n  -21.9490   25.9580  -27.7620 C   0  0  0  0  0  0  0  0  0  0  0  0\n  -23.4880   22.2940  -26.6150 C   0  0  0  0  0  0  0  0  0  0  0  0\n  -21.5920   23.8420  -26.3070 C   0  0  0  0  0  0  0  0  0  0  0  0\n  -23.4980   24.2580  -27.7520 C   0  0  0  0  0  0  0  0  0  0  0  0\n  -22.2690   24.6960  -27.2000 C   0  0  0  0  0  0  0  0  0  0  0  0\n  -24.7448   25.1904  -29.1663 H   0  0  0  0  0  0  0  0  0  0  0  0\n  -21.8559   21.9992  -25.4108 H   0  0  0  0  0  0  0  0  0  0  0  0\n  -23.0825   27.1047  -29.0935 H   0  0  0  0  0  0  0  0  0  0  0  0\n  -21.1329   26.5107  -27.5932 H   0  0  0  0  0  0  0  0  0  0  0  0\n  -23.9830   21.0720  -26.3070 R#  0  0  0  0  0  0  0  0  0  0  0  0\n  1  8  2  0  0  0  0\n  7 15  1  0  0  0  0\n  2  5  1  0  0  0  0\n  2  9  1  0  0  0  0\n  3  7  1  0  0  0  0\n  3  8  1  0  0  0  0\n  4  7  2  0  0  0  0\n  4  9  1  0  0  0  0\n  5  6  2  0  0  0  0\n  6 10  1  0  0  0  0\n  8 10  1  0  0  0  0\n  9 10  2  0  0  0  0\n  2 11  1  0  0  0  0\n  3 12  1  0  0  0  0\n  5 13  1  0  0  0  0\n  6 14  1  0  0  0  0\nM  RGP  1  15  15\nM  END\n$$$$\n'
+  }
+
+  static pickedInteractions = [
+    {
+      position: [
+        -24.144,
+        23.09,
+        -27.464
+      ],
+      type: 'ACCEPTOR',
+      source: 'Ligand',
+      component: {}
+    },
+    {
+      position: [
+        -22.992,
+        26.252,
+        -28.579
+      ],
+      type: 'HYDROPHOBIC',
+      source: 'Ligand',
+      component: {}
+    },
+    {
+      position: [
+        -21.949,
+        25.958,
+        -27.762
+      ],
+      type: 'HYDROPHOBIC',
+      source: 'Ligand',
+      component: {}
+    },
+    {
+      position: [
+        -22.269,
+        24.696,
+        -27.2
+      ],
+      type: 'HYDROPHOBIC',
+      source: 'Ligand',
+      component: {}
+    }
+  ]
+
+  static query = {
+    ensemble: 1,
+    core: 1,
+    fragment_set: 1,
+    search_points: {
+      type: 'BOOLEAN',
+      relation: 'AND',
+      left: {
+        type: 'MATCH',
+        mode: 'INCLUDE',
+        radius: 3,
+        searchPoint: {
+          position: [
+            -24.144,
+            23.09,
+            -27.464
+          ],
+          type: 'ACCEPTOR',
+          source: 'Ligand',
+          component: {}
+        }
+      },
+      right: {
+        type: 'BOOLEAN',
+        relation: 'AND',
+        left: {
+          type: 'MATCH',
+          mode: 'INCLUDE',
+          radius: 3,
+          searchPoint: {
+            position: [
+              -22.992,
+              26.252,
+              -28.579
+            ],
+            type: 'HYDROPHOBIC',
+            source: 'Ligand',
+            component: {}
+          }
+        },
+        right: {
+          type: 'BOOLEAN',
+          relation: 'AND',
+          left: {
+            type: 'MATCH',
+            mode: 'INCLUDE',
+            radius: 3,
+            searchPoint: {
+              position: [
+                -21.949,
+                25.958,
+                -27.762
+              ],
+              type: 'HYDROPHOBIC',
+              source: 'Ligand',
+              component: {}
+            }
+          },
+          right: {
+            type: 'MATCH',
+            mode: 'INCLUDE',
+            radius: 3,
+            searchPoint: {
+              position: [
+                -22.269,
+                24.696,
+                -27.2
+              ],
+              type: 'HYDROPHOBIC',
+              source: 'Ligand',
+              component: {}
+            }
+          }
+        }
+      }
+    }
+  }
 }

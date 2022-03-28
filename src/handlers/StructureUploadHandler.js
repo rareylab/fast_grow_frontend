@@ -10,12 +10,17 @@ export class StructureUploadHandler {
     this.componentCache = componentCache
   }
 
-  async structureUpload (event, baseUrl = '') {
-    event.preventDefault()
-    if (!this.validate(event)) {
+  /**
+   * Upload structures to the backend server and FastGrow itself
+   * @param {Event} formSubmitEvent submit event for structure upload
+   * @param {string} baseUrl base URL of the backend server
+   */
+  async structureUpload (formSubmitEvent, baseUrl = '') {
+    formSubmitEvent.preventDefault()
+    if (!this.validate(formSubmitEvent)) {
       return
     }
-    const formData = this.makeFormData(event)
+    const formData = this.makeFormData(formSubmitEvent)
     try {
       window.dispatchEvent(new CustomEvent('pollingOn', { bubbles: true }))
       const response = await fetch(baseUrl + '/complex', {
@@ -23,7 +28,7 @@ export class StructureUploadHandler {
         body: formData
       })
       let ensemble = await response.json()
-      ensemble = await Utils.pollUpload(ensemble, baseUrl + '/complex/')
+      ensemble = await Utils.pollModel(ensemble, baseUrl + '/complex/')
       window.dispatchEvent(new CustomEvent('pollingOff', { bubbles: true }))
       await this.load(ensemble)
       if (this.model.ligand && this.model.pocket) {
@@ -208,6 +213,10 @@ export class StructureUploadHandler {
     return first.name < second.name ? -1 : 1
   }
 
+  /**
+   * Pick a ligand
+   * @param {integer} ligandId ID of the ligand to pick
+   */
   ligandChosen (ligandId) {
     const ligandComponent = this.componentCache.get('ligand_' + ligandId)
     if (!ligandComponent) {
@@ -218,6 +227,10 @@ export class StructureUploadHandler {
     this.nglContext.render()
   }
 
+  /**
+   * Pick a pocket
+   * @param {integer} complexId ID of the complex to pick as a pocket
+   */
   pocketChosen (complexId) {
     const complexComponent = this.componentCache.get('complex_' + complexId)
     if (!complexComponent) {

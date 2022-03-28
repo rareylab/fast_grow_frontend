@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import { MockComponent } from '../utils/Mocks'
-import { HiddenInteractionCollectionComponent } from '@/nglComponents/HiddenInteractionCollectionComponent'
+import { HiddenInteractionsComponent } from '@/nglComponents/HiddenInteractionsComponent'
 
 describe('HiddenInteractionCollectionComponent', () => {
   it('renders interaction shadows', () => {
@@ -19,7 +19,7 @@ describe('HiddenInteractionCollectionComponent', () => {
         id: index
       })
     })
-    const interactionComponent = new HiddenInteractionCollectionComponent(geometries)
+    const interactionComponent = new HiddenInteractionsComponent(geometries)
     interactionComponent.setVisibility(true)
     geometries.forEach((geometry) => {
       // eslint-disable-next-line no-unused-expressions
@@ -55,7 +55,7 @@ describe('HiddenInteractionCollectionComponent', () => {
     }
     const representation = geometry.component.addRepresentation()
     representation.parameters.opacity = 0.5
-    const interactionComponent = new HiddenInteractionCollectionComponent([geometry])
+    const interactionComponent = new HiddenInteractionsComponent([geometry])
     interactionComponent.showAllShadows = true
     interactionComponent.setVisibility(true)
     // eslint-disable-next-line no-unused-expressions
@@ -80,7 +80,7 @@ describe('HiddenInteractionCollectionComponent', () => {
     }
     const representation = geometry.component.addRepresentation()
     representation.parameters.opacity = 0.5
-    const interactionComponent = new HiddenInteractionCollectionComponent([geometry])
+    const interactionComponent = new HiddenInteractionsComponent([geometry])
     interactionComponent.showAllShadows = false
     interactionComponent.setVisibility(true)
     // eslint-disable-next-line no-unused-expressions

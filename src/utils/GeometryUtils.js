@@ -29,6 +29,13 @@ export class GeometryUtils {
     return component
   }
 
+  /**
+   * Creates an h-bond interaction
+   * @param {object} stage NGL stage
+   * @param {object} interaction h-bond interaction
+   * @param {object} options options to pass through to the NGL
+   * @returns {object} interaction component
+   */
   static makeHBondInteraction (stage, interaction, options = {}) {
     const color = new NGL.Color(1 - interaction.score, interaction.score, 0)
     options.name = options.name || 'interactionGeometry'
@@ -46,21 +53,35 @@ export class GeometryUtils {
     return interactionComponent
   }
 
-  static makeHBondPoint (stage, interaction, options = {}) {
+  /**
+   * Creates an h-bond point
+   * @param {object} stage NGL stage
+   * @param {object} interactionPoint h-bond interaction point
+   * @param {object} options options to pass through to the NGL
+   * @returns {object} interaction component
+   */
+  static makeHBondPoint (stage, interactionPoint, options = {}) {
     let color = new NGL.Color(0, 1, 0)
-    if (interaction.type === 'ACCEPTOR') {
+    if (interactionPoint.type === 'ACCEPTOR') {
       color = new NGL.Color(1, 0, 0)
     }
     options.name = options.name || 'interactionGeometry'
     options.opacity = options.opacity || 0.5
     const interactionGeometry = new NGL.Shape(options.name)
-    interactionGeometry.addSphere(interaction.position, color, 1, options.name)
+    interactionGeometry.addSphere(interactionPoint.position, color, 1, options.name)
     const interactionComponent = stage.addComponentFromObject(interactionGeometry)
     interactionComponent.addRepresentation('buffer', options)
     interactionComponent.setVisibility(false)
     return interactionComponent
   }
 
+  /**
+   * Creates a hydrophobic point
+   * @param {object} stage NGL stage
+   * @param {object} interactionPoint h-bond interaction point
+   * @param {object} options options to pass through to the NGL
+   * @returns {object} interaction component
+   */
   static makeHydrophobicPoint (stage, interactionPoint, options = {}) {
     const color = new NGL.Color(0.8, 0.8, 0)
     options.name = options.name || 'interactionsGeometry'
