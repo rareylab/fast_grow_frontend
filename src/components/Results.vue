@@ -12,12 +12,12 @@
   </div>
   <div class="table-field" ref="table-field">
     <table class="table">
-      <thead>
+      <thead ref="table-head">
       <tr>
         <th>ID</th>
-        <th>Score <i class="bi bi-caret-down"></i></th><!-- TODO dynamic sorting -->
+        <th>Score <i :class="'bi bi-caret-down' + ('score' === this.sortKey ? '-fill' : '')"></i></th>
         <th v-for="name in this.ensembleNames" :key="this.ensembleNames.indexOf(name)">
-          {{ name }}
+          {{ name }}<i :class="'bi bi-caret-down' + (name === this.sortKey ? '-fill' : '')"></i>
         </th>
         <th>Name</th>
       </tr>
@@ -47,7 +47,8 @@ export default {
   data: () => {
     return {
       manualSelection: false,
-      currentHitID: undefined
+      currentHitID: undefined,
+      sortKey: 'score'
     }
   },
   computed: {
@@ -61,9 +62,11 @@ export default {
       }
       const sortedHits = Array.from(this.hits)
       sortedHits.sort((firstHit, secondHit) => {
-        if (firstHit.score < secondHit.score) {
+        const firstSortValue = this.sortValue(firstHit)
+        const secondSortValue = this.sortValue(secondHit)
+        if (firstSortValue < secondSortValue) {
           return -1
-        } else if (firstHit.score > secondHit.score) {
+        } else if (firstSortValue > secondSortValue) {
           return 1
         }
         return 0
@@ -125,6 +128,30 @@ export default {
         rows[i].classList.remove('highlighted')
       }
       row.classList.add('highlighted')
+    },
+    setSortKey (event) {
+      let header = event.target
+      if (header.tagName !== 'TH') {
+        header = header.parentElement
+      }
+      // only headers with carets are sortable, headers without carets don't have children
+      if (header.children.length === 0) {
+        return
+      }
+      if (header.textContent.trim() === 'Score') {
+        this.sortKey = 'score'
+      } else {
+        this.sortKey = header.textContent
+      }
+    },
+    /**
+     * Get sort value
+     */
+    sortValue (hit) {
+      if (this.sortKey === 'score') {
+        return hit[this.sortKey]
+      }
+      return hit.ensemble_scores[this.sortKey]
     }
   },
   mounted () {
@@ -133,6 +160,9 @@ export default {
     })
     window.addEventListener('shown.bs.tab', () => {
       this.updateTableSize()
+    })
+    this.$refs['table-head'].addEventListener('click', (event) => {
+      this.setSortKey(event)
     })
     // table click listener
     this.$refs['table-body'].addEventListener('click', (event) => {

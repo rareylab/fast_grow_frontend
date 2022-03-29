@@ -26,7 +26,7 @@
     <table class="table">
       <thead>
       <tr>
-        <th>No. <i class="bi bi-caret-down"></i></th>
+        <th>No. <i class="bi bi-caret-down-fill"></i></th>
         <th>Type</th>
         <th>Residue</th>
         <th>Action</th>
