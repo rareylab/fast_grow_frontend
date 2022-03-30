@@ -34,6 +34,11 @@
       </tbody>
     </table>
   </div>
+  <div ref="footer">
+    <div v-if="this.sortedHits.length > 0">
+      <a class="btn btn-primary m-2" :href="this.download" target="_blank">Download</a>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -43,7 +48,7 @@ import * as _ from 'lodash'
 export default {
   name: 'Results',
   emits: ['picked'],
-  props: ['hits', 'loading'],
+  props: ['download', 'hits', 'loading'],
   data: () => {
     return {
       manualSelection: false,
@@ -107,13 +112,19 @@ export default {
     updateTableSize () {
       const tableField = this.$refs['table-field']
       const title = this.$refs.header
+      const footer = this.$refs.footer
       const margin = 16 // bootstrap adds bottom-margin to titles
-      // Sometimes table field doesn't exist. Sometimes it does. Ask the Vue developers why.
-      if (!tableField || !title) {
+      // Sometimes refs don't exist. Sometimes they do. Ask the Vue developers why.
+      if (!tableField || !title || !footer) {
         return
       }
       tableField.style.height = 0 + 'px' // reduce height to avoid changing parent height
-      tableField.style.height = (tableField.parentElement.clientHeight - title.clientHeight - margin) + 'px'
+      tableField.style.height = (
+        tableField.parentElement.clientHeight -
+        title.clientHeight -
+        footer.clientHeight -
+        margin
+      ) + 'px'
     },
     /**
      * Apply a hit row

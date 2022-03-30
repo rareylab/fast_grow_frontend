@@ -291,6 +291,7 @@
             <results
               :loading="this.pollingServer"
               :hits="this.growingModel.hitsArray"
+              :download="this.growingModel.growing ? this.baseUrl + '/growing/' + this.growingModel.growing.id + '/download' : ''"
               @picked="this.hitChosen"
             ></results>
           </div>
@@ -414,6 +415,7 @@ export default {
         growSubmitError: undefined,
         fragmentSets: undefined,
         currentFragmentSet: undefined,
+        growing: undefined,
         hits: new Map(),
         hitsArray: []
       }
