@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
 from tests import SERVER_TIMEOUT, URL, TEST_FILES
+from tests.utils.actions import upload_pdb_and_sdf, upload_ensemble_and_sdf
 from tests.utils.waiters import element_has_css_class
 from tests.utils.webdriver import setup_webdriver
 
@@ -40,15 +41,8 @@ class StructureUploadTests(unittest.TestCase):
     def test_upload_pdb_and_sdf(self):
         """test uploading a PDB file and an SDF"""
         self.driver.get(URL)
-        protein_file_field = self.driver.find_element(By.ID, 'protein-file-field')
-        protein_file_field.send_keys(os.path.join(TEST_FILES, '7A4R_1.pdb'))
-        ligand_file_field = self.driver.find_element(By.ID, 'ligand-file-field')
-        ligand_file_field.send_keys(os.path.join(TEST_FILES, '7A4R_1.sdf'))
-        upload_button = self.driver.find_element(By.ID, 'structure-upload-button')
-        upload_button.click()
         try:
-            WebDriverWait(self.driver, SERVER_TIMEOUT).until(
-                element_has_css_class((By.ID, 'cut-tab-trigger'), 'active'))
+            upload_pdb_and_sdf(self.driver)
         except TimeoutException:
             raise RuntimeError('Failure in structure upload') from None
         ligands_tab = self.driver.find_element(By.ID, 'ligands-tab')
@@ -78,18 +72,8 @@ class StructureUploadTests(unittest.TestCase):
     def test_upload_multiple_pdbs_and_sdf(self):
         """test uploading multiple PDB files and an SDF"""
         self.driver.get(URL)
-        protein_file_field = self.driver.find_element(By.ID, 'protein-file-field')
-        protein_file_field.send_keys(os.path.join(TEST_FILES, '7A4R_1.pdb'))
-        protein_file_field.send_keys(os.path.join(TEST_FILES, '7A4S_3.pdb'))
-        protein_file_field.send_keys(os.path.join(TEST_FILES, '7A4W_4.pdb'))
-        ligand_file_field = self.driver.find_element(By.ID, 'ligand-file-field')
-        ligand_file_field.send_keys(os.path.join(TEST_FILES, '7A4R_1.sdf'))
-        upload_button = self.driver.find_element(By.ID, 'structure-upload-button')
-        upload_button.click()
-        # TODO the tab that this should switch to doesn't exist yet
         try:
-            WebDriverWait(self.driver, SERVER_TIMEOUT).until(
-                element_has_css_class((By.ID, 'pockets-tab-trigger'), 'active'))
+            upload_ensemble_and_sdf(self.driver)
         except TimeoutException:
             raise AssertionError('Failure in structure upload') from None
         pockets_tab = self.driver.find_element(By.ID, 'pockets-tab')

@@ -1,13 +1,13 @@
 """growing tests"""
-import os
-import time
 import unittest
 
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 
-from tests import SERVER_TIMEOUT, URL, TEST_FILES
-from tests.utils.waiters import element_has_css_class, element_not_disabled, element_does_not_exist
+from tests import SERVER_TIMEOUT, URL
+from tests.utils.actions import upload_pdb_and_sdf, cut_ligand, get_ligand_interactions, \
+    upload_ensemble_and_sdf, switch_tab
+from tests.utils.waiters import element_has_css_class, element_does_not_exist
 from tests.utils.webdriver import setup_webdriver
 
 
@@ -20,159 +20,91 @@ class GrowingTests(unittest.TestCase):
     def tearDown(self):
         self.driver.close()
 
-    def test_growing(self):
-        self.driver.get(URL)
-        protein_file_field = self.driver.find_element(By.ID, 'protein-file-field')
-        protein_file_field.send_keys(os.path.join(TEST_FILES, '7A4R_1.pdb'))
-        ligand_file_field = self.driver.find_element(By.ID, 'ligand-file-field')
-        ligand_file_field.send_keys(os.path.join(TEST_FILES, '7A4R_1.sdf'))
-        upload_button = self.driver.find_element(By.ID, 'structure-upload-button')
-        upload_button.click()
-        WebDriverWait(self.driver, SERVER_TIMEOUT).until(
-            element_has_css_class((By.ID, 'cut-tab-trigger'), 'active'))
-
-        # bond cutting
-        pick_bond = """
-                bond = {
-                    atom1: {
-                        atomname: 'N2',
-                        element: 'N',
-                        index: 1,
-                        positionToArray() { return [-23.982999801635742, 21.07200050354004, -26.30699920654297] }
-                    },
-                    atom2: {
-                        atomname: 'C8',
-                        element: 'C',
-                        index: 7,
-                        positionToArray() { return [-23.488000869750977, 22.29400062561035, -26.614999771118164] }
-                    }
-                };
-                app.$refs.clip.setAtoms(bond);
-                """
-        self.driver.execute_script(pick_bond)
-        cut_button = self.driver.find_element(By.ID, 'clip-button')
-        time.sleep(1)  # race condition fear
-        cut_button.click()
-        WebDriverWait(self.driver, SERVER_TIMEOUT).until(
-            element_not_disabled((By.ID, 'clip-button')))
-
-        # growing query
-        growing_dropdown_trigger = self.driver.find_element(By.ID, 'growing-dropdown')
-        growing_dropdown_trigger.click()
-        query_tab_trigger = self.driver.find_element(By.ID, 'query-tab-trigger')
-        query_tab_trigger.click()
-        WebDriverWait(self.driver, SERVER_TIMEOUT).until(
-            element_has_css_class((By.ID, 'query-tab'), 'active'))
-
-        # check complexes
+    def get_nof_complexes(self):
+        """Get nof query complexes in the growing query"""
         query_complexes_table = self.driver.find_element(By.ID, 'query-complexes')
         query_complexes = query_complexes_table.find_elements(By.TAG_NAME, 'td')
-        nof_query_complexes = len(query_complexes)
-        self.assertEqual(nof_query_complexes, 1)
+        return len(query_complexes)
 
-        # check core
+    def get_query_core(self):
+        """Get name of the query core"""
         query_core_field = self.driver.find_element(By.ID, 'query-core')
-        query_core = query_core_field.get_attribute('value')
-        self.assertEqual(query_core, '7A4R_1_8_2')
+        return query_core_field.get_attribute('value')
 
-        # check interactions
+    def get_nof_interactions(self):
+        """Get nof query interactions in the growing query"""
         query_interactions_table = self.driver.find_element(By.ID, 'query-interactions')
         query_interactions = query_interactions_table.find_elements(By.TAG_NAME, 'tr')
-        nof_query_interactions = len(query_interactions) - 1  # remove header
-        self.assertEqual(nof_query_interactions, 0)
+        return len(query_interactions) - 1  # remove header
 
+    def perform_growing(self):
+        """Perform a growing and wait until it finishes"""
         grow_button = self.driver.find_element(By.ID, 'grow-button')
         grow_button.click()
         WebDriverWait(self.driver, SERVER_TIMEOUT).until(
             element_has_css_class((By.ID, 'results-tab'), 'active'))
         WebDriverWait(self.driver, SERVER_TIMEOUT).until(
             element_does_not_exist((By.CLASS_NAME, 'spinner-grow')))
+
+    def get_nof_hits(self):
+        """Get nof hits in the growing results"""
         query_tab = self.driver.find_element(By.ID, 'results-tab')
         # one header row, the rest are hits
-        nof_hits = len(query_tab.find_elements(By.TAG_NAME, 'tr')) - 1
-        self.assertGreater(nof_hits, 0)
+        return len(query_tab.find_elements(By.TAG_NAME, 'tr')) - 1
+
+    def get_nof_headers(self):
+        """Get nof headers in the result table"""
+        query_tab = self.driver.find_element(By.ID, 'results-tab')
+        return len(query_tab.find_elements(By.TAG_NAME, 'th'))
+
+    def test_growing(self):
+        """Test a simple growing with one complex and one ligand"""
+        self.driver.get(URL)
+        upload_pdb_and_sdf(self.driver)
+        cut_ligand(self.driver)
+
+        switch_tab(self.driver, 'query-tab', 'growing-dropdown')
+        self.assertEqual(self.get_nof_complexes(), 1)
+        self.assertEqual(self.get_query_core(), '7A4R_1_8_2')
+
+        self.perform_growing()
+        self.assertGreater(self.get_nof_hits(), 0)
 
     def test_growing_interactions(self):
+        """Test a growing with an interaction"""
         self.driver.get(URL)
-        protein_file_field = self.driver.find_element(By.ID, 'protein-file-field')
-        protein_file_field.send_keys(os.path.join(TEST_FILES, '7A4R_1.pdb'))
-        ligand_file_field = self.driver.find_element(By.ID, 'ligand-file-field')
-        ligand_file_field.send_keys(os.path.join(TEST_FILES, '7A4R_1.sdf'))
-        upload_button = self.driver.find_element(By.ID, 'structure-upload-button')
-        upload_button.click()
-        WebDriverWait(self.driver, SERVER_TIMEOUT).until(
-            element_has_css_class((By.ID, 'cut-tab-trigger'), 'active'))
+        upload_pdb_and_sdf(self.driver)
+        cut_ligand(self.driver)
+        get_ligand_interactions(self.driver)
 
-        # bond cutting
-        pick_bond = """
-                    bond = {
-                        atom1: {
-                            atomname: 'N2',
-                            element: 'N',
-                            index: 1,
-                            positionToArray() { return [-23.982999801635742, 21.07200050354004, -26.30699920654297] }
-                        },
-                        atom2: {
-                            atomname: 'C8',
-                            element: 'C',
-                            index: 7,
-                            positionToArray() { return [-23.488000869750977, 22.29400062561035, -26.614999771118164] }
-                        }
-                    };
-                    app.$refs.clip.setAtoms(bond);
-                    """
-        self.driver.execute_script(pick_bond)
-        cut_button = self.driver.find_element(By.ID, 'clip-button')
-        time.sleep(1)  # race condition fear
-        cut_button.click()
-        WebDriverWait(self.driver, SERVER_TIMEOUT).until(
-            element_not_disabled((By.ID, 'clip-button')))
-
-        # interactions
-        ligand_tab_trigger = self.driver.find_element(By.ID, 'interactions-dropdown')
-        ligand_tab_trigger.click()
-        ligand_tab_trigger = self.driver.find_element(By.ID, 'ligand-interactions-tab-trigger')
-        ligand_tab_trigger.click()
-        WebDriverWait(self.driver, SERVER_TIMEOUT).until(
-            element_has_css_class((By.ID, 'ligand-interactions-tab'), 'active'))
-        WebDriverWait(self.driver, SERVER_TIMEOUT).until(
-            element_does_not_exist((By.CLASS_NAME, 'spinner-grow')))
+        # pick interaction
         interactions_tab = self.driver.find_element(By.ID, 'ligand-interactions-tab')
         interaction_rows = interactions_tab.find_elements(By.TAG_NAME, 'tr')
         interaction_rows[4].click()
 
-        # growing query
-        growing_dropdown_trigger = self.driver.find_element(By.ID, 'growing-dropdown')
-        growing_dropdown_trigger.click()
-        query_tab_trigger = self.driver.find_element(By.ID, 'query-tab-trigger')
-        query_tab_trigger.click()
-        WebDriverWait(self.driver, SERVER_TIMEOUT).until(
-            element_has_css_class((By.ID, 'query-tab'), 'active'))
+        switch_tab(self.driver, 'query-tab', 'growing-dropdown')
+        self.assertEqual(self.get_nof_complexes(), 1)
+        self.assertEqual(self.get_query_core(), '7A4R_1_8_2')
+        self.assertEqual(self.get_nof_interactions(), 1)
 
-        # check complexes
-        query_complexes_table = self.driver.find_element(By.ID, 'query-complexes')
-        query_complexes = query_complexes_table.find_elements(By.TAG_NAME, 'td')
-        nof_query_complexes = len(query_complexes)
-        self.assertEqual(nof_query_complexes, 1)
+        self.perform_growing()
+        self.assertGreater(self.get_nof_hits(), 0)
 
-        # check core
-        query_core_field = self.driver.find_element(By.ID, 'query-core')
-        query_core = query_core_field.get_attribute('value')
-        self.assertEqual(query_core, '7A4R_1_8_2')
+    def test_growing_ensemble(self):
+        """Test a growing with an ensemble"""
+        self.driver.get(URL)
+        upload_ensemble_and_sdf(self.driver)
+        pockets_tab = self.driver.find_element(By.ID, 'pockets-tab')
+        pocket_rows = pockets_tab.find_elements(By.TAG_NAME, 'tr')
+        pocket_rows[1].click()
 
-        # check interactions
-        query_interactions_table = self.driver.find_element(By.ID, 'query-interactions')
-        query_interactions = query_interactions_table.find_elements(By.TAG_NAME, 'tr')
-        nof_query_interactions = len(query_interactions) - 1  # remove header
-        self.assertEqual(nof_query_interactions, 1)
+        switch_tab(self.driver, 'cut-tab')
+        cut_ligand(self.driver)
 
-        grow_button = self.driver.find_element(By.ID, 'grow-button')
-        grow_button.click()
-        WebDriverWait(self.driver, SERVER_TIMEOUT).until(
-            element_has_css_class((By.ID, 'results-tab'), 'active'))
-        WebDriverWait(self.driver, SERVER_TIMEOUT).until(
-            element_does_not_exist((By.CLASS_NAME, 'spinner-grow')))
-        query_tab = self.driver.find_element(By.ID, 'results-tab')
-        # one header row, the rest are hits
-        nof_hits = len(query_tab.find_elements(By.TAG_NAME, 'tr')) - 1
-        self.assertGreater(nof_hits, 0)
+        switch_tab(self.driver, 'query-tab', 'growing-dropdown')
+        self.assertEqual(self.get_nof_complexes(), 3)
+        self.assertEqual(self.get_query_core(), '7A4R_1_8_2')
+
+        self.perform_growing()
+        self.assertGreater(self.get_nof_hits(), 0)
+        self.assertEqual(self.get_nof_headers() - 3, 3)  # 3 fixed headers and 3 proteins in ensemble

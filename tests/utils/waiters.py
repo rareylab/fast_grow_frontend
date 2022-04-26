@@ -1,6 +1,7 @@
 """custom waiters for selenium web driver waits"""
 from selenium.common.exceptions import NoSuchElementException
 
+
 class element_has_css_class:
     """An expectation for checking that an element has a particular css class.
 
@@ -39,6 +40,7 @@ class element_stays_the_same:
         self.element = element
         return False
 
+
 class element_not_disabled:
     """Check an element is not disabled
 
@@ -53,6 +55,7 @@ class element_not_disabled:
         element = driver.find_element(*self.locator)
         return element.get_attribute('disabled') is None
 
+
 class js_returns_true:
     """Check JS returns true
 
@@ -66,6 +69,7 @@ class js_returns_true:
     def __call__(self, driver):
         return driver.execute_script(self.script)
 
+
 class element_does_not_exist:
     """Check an element does not exist
 
@@ -78,7 +82,7 @@ class element_does_not_exist:
 
     def __call__(self, driver):
         try:
-            element = driver.find_element(*self.locator)
+            driver.find_element(*self.locator)
             return False
         except NoSuchElementException:
             return True
