@@ -278,7 +278,7 @@
               :fragment-sets="this.growingModel.fragmentSets"
               :complexes="this.structureUploadModel.complexes"
               :core="this.cutModel.core"
-              :interactions="this.interactionsArray"
+              :interactions="this.interactionModel.pickedInteractionsArray"
               @grow="this.grow"
             ></query>
           </div>
@@ -286,7 +286,7 @@
             class="tab-pane fade h-100"
             id="results-tab"
             role="tabpanel"
-            aria-labelledby="query-tab"
+            aria-labelledby="results-tab"
           >
             <results
               :loading="this.pollingServer"
@@ -313,7 +313,7 @@ import { Utils } from '@/utils/Utils'
 import { StructureUploadHandler } from '@/handlers/StructureUploadHandler'
 import { CutHandler } from '@/handlers/CutHandler'
 import { InteractionHandler } from '@/handlers/InteractionHandler'
-import { InteractionSetComponent } from '@/nglComponents/InteractionSetComponent'
+// import { InteractionSetComponent } from '@/nglComponents/InteractionSetComponent'
 import { GrowingHandler } from '@/handlers/GrowingHandler'
 
 // components
@@ -385,7 +385,6 @@ export default {
       baseUrl: 'http://localhost:8000', // TODO edit in production
       // data variables
       // this state is duplicated from the nglContext because the Vue proxy breaks NGL components
-      pickedInteractions: new Map(),
       structureUploadModel: {
         structureSubmitError: undefined,
         ensemble: undefined,
@@ -409,7 +408,9 @@ export default {
         waterInteractions: undefined,
         pocketInteractions: undefined,
         residueToInteractions: undefined,
-        highlightedResidue: undefined
+        highlightedResidue: undefined,
+        pickedInteractions: new Map(),
+        pickedInteractionsArray: []
       },
       growingModel: {
         growSubmitError: undefined,
@@ -419,41 +420,6 @@ export default {
         hits: new Map(),
         hitsArray: []
       }
-    }
-  },
-  watch: {
-    pickedInteractions: {
-      handler (newPickedInteractions) {
-        if (!this.nglContext.components.has('pickedInteractions')) {
-          this.nglContext.registerComponent('pickedInteractions', new InteractionSetComponent())
-        }
-        const pickedInteractionsComponent = this.nglContext.components.get('pickedInteractions')
-        // add new interactions
-        for (const [key, value] of newPickedInteractions) {
-          if (pickedInteractionsComponent.interactions.has(key)) {
-            continue
-          }
-          // copy interaction because loading a Vue proxied object into the NGL throws errors
-          const loadedInteraction = _.clone(value)
-          InteractionHandler.loadSearchPoint(loadedInteraction, this.stage, { opacity: 0.8 })
-          pickedInteractionsComponent.interactions.set(key, loadedInteraction)
-        }
-
-        // remove unselected interactions
-        for (const [key, value] of pickedInteractionsComponent.interactions) {
-          if (newPickedInteractions.has(key)) {
-            continue
-          }
-          pickedInteractionsComponent.interactions.delete(key)
-          this.stage.removeComponent(value.component)
-        }
-      },
-      deep: true
-    }
-  },
-  computed: {
-    interactionsArray () {
-      return Array.from(this.pickedInteractions.values())
     }
   },
   methods: {
@@ -519,34 +485,13 @@ export default {
       await this.interactionHandler.updateInteractions(interactions, this.baseUrl)
     },
     ligandInteractionPicked (interactionID) {
-      this.interactionPicked(interactionID, 'ligandInteractions')
+      this.interactionHandler.interactionPicked(interactionID, 'ligandInteractions')
     },
     waterInteractionPicked (interactionID) {
-      this.interactionPicked(interactionID, 'waterInteractions')
+      this.interactionHandler.interactionPicked(interactionID, 'waterInteractions')
     },
     pocketInteractionPicked (interactionID) {
-      this.interactionPicked(interactionID, 'pocketInteractions')
-    },
-    interactionPicked (interactionID, componentName) {
-      const interactionComponent = this.nglContext.components.get(componentName)
-      if (!interactionComponent) {
-        return
-      }
-      const [toggledOn, geometry] = interactionComponent.toggleHighlight(interactionID)
-      if (toggledOn) {
-        // copy and remove component because Vue and NGL components hate each other
-        const geometryCopy = {}
-        if (geometry.ligandInteraction) {
-          Object.assign(geometryCopy, geometry.ligandInteraction)
-          geometryCopy.source = geometry.source
-        } else {
-          Object.assign(geometryCopy, geometry)
-        }
-        geometryCopy.component = {}
-        this.pickedInteractions.set(geometry.id, geometryCopy)
-      } else {
-        this.pickedInteractions.delete(geometry.id)
-      }
+      this.interactionHandler.interactionPicked(interactionID, 'pocketInteractions')
     },
     toggleInteractionShadows (_event) {
       this.interactionHandler.toggleInteractionShadows()
@@ -557,7 +502,8 @@ export default {
     async grow (fragmentSetID) {
       const ensemble = this.structureUploadModel.ensemble
       const core = this.cutModel.core
-      await this.growingHandler.grow(core, ensemble, this.interactionsArray, fragmentSetID, this.baseUrl)
+      const interactions = this.interactionModel.pickedInteractionsArray
+      await this.growingHandler.grow(core, ensemble, interactions, fragmentSetID, this.baseUrl)
     },
     async hitChosen (event) {
       await this.growingHandler.hitChosen(event)

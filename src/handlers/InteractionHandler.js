@@ -1,5 +1,6 @@
 import { GeometryUtils } from '@/utils/GeometryUtils'
 import { InteractionsComponent } from '@/nglComponents/InteractionsComponent'
+import { InteractionSetComponent } from '@/nglComponents/InteractionSetComponent'
 import { HiddenInteractionsComponent } from '@/nglComponents/HiddenInteractionsComponent'
 import { StructureUtils } from '@/utils/StructureUtils'
 import { Utils } from '@/utils/Utils'
@@ -195,5 +196,47 @@ export class InteractionHandler {
         interactionComponent.enableShadow(interactionID)
       })
     }
+  }
+
+  /***
+   * Pick an interaction
+   * @param {Integer} interactionID
+   * @param {String} componentName
+   */
+  interactionPicked (interactionID, componentName) {
+    if (!this.nglContext.components.has('pickedInteractions')) {
+      this.nglContext.registerComponent('pickedInteractions', new InteractionSetComponent())
+    }
+    const pickedInteractionsComponent = this.nglContext.components.get('pickedInteractions')
+    const interactionComponent = this.nglContext.components.get(componentName)
+    if (!interactionComponent) {
+      return
+    }
+    const [toggledOn, geometry] = interactionComponent.toggleHighlight(interactionID)
+    if (toggledOn) {
+      // copy and remove component because Vue and NGL components hate each other
+      const geometryCopy = {}
+      if (geometry.ligandInteraction) {
+        Object.assign(geometryCopy, geometry.ligandInteraction)
+        geometryCopy.source = geometry.source
+      } else {
+        Object.assign(geometryCopy, geometry)
+      }
+      geometryCopy.component = {}
+      this.model.pickedInteractions.set(geometry.id, geometryCopy)
+
+      // copy interaction again to generate search point (generating search point on geometryCopy can lead to Vue errors)
+      const searchPointCopy = {}
+      Object.assign(searchPointCopy, geometryCopy)
+      InteractionHandler.loadSearchPoint(searchPointCopy, this.nglContext.stage, { opacity: 0.8 })
+      pickedInteractionsComponent.interactions.set(geometry.id, searchPointCopy)
+    } else {
+      this.model.pickedInteractions.delete(geometry.id)
+      // remove from picked interactions component
+      const searchPoint = pickedInteractionsComponent.interactions.get(geometry.id)
+      this.nglContext.stage.removeComponent(searchPoint.component)
+      pickedInteractionsComponent.interactions.delete(geometry.id)
+    }
+    this.model.pickedInteractionsArray = Array.from(this.model.pickedInteractions.values())
   }
 }

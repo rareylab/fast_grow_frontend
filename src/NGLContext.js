@@ -259,8 +259,8 @@ export class NGLContext {
    */
   deregisterComponent (name) {
     const formerComponent = this.components.get(name)
-    formerComponent.setVisibility(false)
     if (formerComponent) {
+      formerComponent.setVisibility(false)
       this.componentSet.delete(formerComponent)
     }
     this.components.delete(name)
