@@ -364,10 +364,19 @@ export class NGLContext {
 
   /**
    * Clear all registered components
+   * @return {Array<Object>} cleared components
    */
   clearComponents () {
+    const clearedComponents = []
+    for (const key of this.components.keys()) {
+      const formerComponent = this.deregisterComponent(key)
+      if (formerComponent) {
+        clearedComponents.push(formerComponent)
+      }
+    }
     this.components = new Map()
     this.componentSet = new Set()
+    return clearedComponents
   }
 
   /**

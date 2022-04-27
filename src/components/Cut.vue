@@ -64,18 +64,14 @@ import { StructureUtils } from '@/utils/StructureUtils'
 
 export default {
   name: 'Cut',
-  emits: ['register', 'bondChosen', 'cut', 'reset'],
+  emits: ['register', 'bondChosen', 'cut', 'reset', 'anchor', 'linker'],
   props: {
     submitError: String,
     pollingServer: Boolean,
     view: String,
-    ligand: Object
-  },
-  data: () => {
-    return {
-      anchor: undefined,
-      linker: undefined
-    }
+    ligand: Object,
+    anchor: Object,
+    linker: Object
   },
   computed: {
     anchorName () {
@@ -122,23 +118,20 @@ export default {
      * @param {object} bond NGL bond proxy
      */
     setAtoms (bond) {
-      this.anchor = bond.atom1
-      this.linker = bond.atom2
+      let anchor = bond.atom1
+      let linker = bond.atom2
       if (bond.atom1.element === 'R#' ||
         (bond.atom2.element === 'C' && bond.atom1.element !== 'C')) {
-        this.anchor = bond.atom2
-        this.linker = bond.atom1
+        anchor = bond.atom2
+        linker = bond.atom1
       }
-      this.$emit('bondChosen', this.anchor, this.linker)
+      this.$emit('bondChosen', anchor, linker)
     },
     /**
      * Switch anchor and linker atoms
      */
     switchAtoms () {
-      const tmp = this.anchor
-      this.anchor = this.linker
-      this.linker = tmp
-      this.$emit('bondChosen', this.anchor, this.linker)
+      this.$emit('bondChosen', this.linker, this.anchor)
     }
   },
   mounted () {

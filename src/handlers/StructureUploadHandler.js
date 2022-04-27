@@ -87,8 +87,8 @@ export class StructureUploadHandler {
    * @param {object} ensemble
    */
   async load (ensemble) {
-    // const catFound = new CustomEvent('remove', { derivedFrom: 'ligands' })
-    // window.dispatchEvent(catFound)
+    const removeDerivedDataEvent = new CustomEvent('remove')
+    window.dispatchEvent(removeDerivedDataEvent)
     this.model.ensemble = ensemble
 
     const [complexRepresentations, ligandChoiceRepresentations, ligandComponents] = await StructureUploadHandler.loadEnsemble(ensemble, this.nglContext.stage)

@@ -207,6 +207,8 @@
               :polling-server="this.pollingServer"
               :submit-error="this.cutModel.cutSubmitError"
               :ligand="this.structureUploadModel.ligand"
+              :anchor="this.cutModel.anchor"
+              :linker="this.cutModel.linker"
               ref="clip"
               @register="this.registerListener"
               @bondChosen="this.bondChosen"
@@ -440,16 +442,44 @@ export default {
     registerListener (view, listener) {
       this.nglContext.registerViewListener(view, listener)
     },
-    removeDerivedData (derivedFrom = 'ligands') {
-      const derivedData = ['ligands', 'ligand', 'pocket', 'anchor', 'linker', 'bondMarker']
-      for (let index = derivedData.indexOf(derivedFrom); index < derivedData.length; index++) {
-        const dataName = derivedData[index]
-        if (this.nglContext.components.has(dataName)) {
-          this.nglContext.deregisterComponent(dataName)
-          this[dataName] = undefined
-          // TODO shrink the cache?
+    /**
+     * remove model data and replace with correct but empty datastructures
+     * @param {Object} model model to empty
+     */
+    removeModelData (model) {
+      for (const key in model) {
+        // ignore undefined
+        if (model[key] === undefined) {
+          continue
+        }
+        // boolean
+        if (typeof model[key] === 'boolean') {
+          model[key] = false
+          // array
+        } else if (model[key].length !== undefined) {
+          model[key] = []
+        } else if (model[key].size !== undefined && model[key].add !== undefined) {
+          // set
+          model[key] = new Set()
+        } else if (model[key].size !== undefined) {
+          // map
+          model[key] = new Map()
+        } else {
+          model[key] = undefined
         }
       }
+    },
+    /**
+     * Remove data derived from the initial upload.
+     *
+     * Basically reset the app except for basic config and the growing results. Growing results are
+     * also derived from the initial data upload but it's probably a better idea to keep them in
+     * case someone uploads something accidentally and has their results wiped.
+     */
+    removeDerivedData () {
+      this.removeModelData(this.cutModel)
+      this.removeModelData(this.interactionModel)
+      this.nglContext.clearComponents()
     },
     async pollUpload (model, pollUrl, interval = 1000, updateCallback = undefined) {
       while (model.status === 'pending') {
@@ -462,6 +492,7 @@ export default {
       }
       return model
     },
+    // strucutre handling
     async structureUpload (event) {
       await this.structureUploadHandler.structureUpload(event, this.baseUrl)
     },
@@ -471,6 +502,7 @@ export default {
     pocketChosen (event) {
       this.structureUploadHandler.pocketChosen(event)
     },
+    // bond cutting
     bondChosen (anchor, linker) {
       this.cutHandler.bondChosen(anchor, linker)
     },
@@ -481,6 +513,7 @@ export default {
     coreReset () {
       this.cutHandler.coreReset()
     },
+    // interactiong handling
     async updateInteractions (interactions) {
       await this.interactionHandler.updateInteractions(interactions, this.baseUrl)
     },
@@ -499,6 +532,7 @@ export default {
     toggleResidueShadows (event) {
       this.interactionHandler.toggleResidueShadows(event)
     },
+    // growing and results
     async grow (fragmentSetID) {
       const ensemble = this.structureUploadModel.ensemble
       const core = this.cutModel.core
@@ -550,8 +584,8 @@ export default {
       }
     })
 
-    window.addEventListener('remove', (event) => {
-      this.removeDerivedData(event.derivedFrom)
+    window.addEventListener('remove', () => {
+      this.removeDerivedData()
     })
 
     window.addEventListener('pollingOn', () => {
@@ -566,6 +600,7 @@ export default {
       this.changeTab(event.detail.tabTrigger)
     })
 
+    // query fragment sets
     fetch(this.baseUrl + '/fragments').then(async (response) => {
       this.growingModel.fragmentSets = await response.json()
     })
