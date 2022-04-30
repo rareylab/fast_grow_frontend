@@ -1,4 +1,5 @@
 """growing tests"""
+import time
 import unittest
 
 from selenium.webdriver.common.by import By
@@ -43,8 +44,7 @@ class GrowingTests(unittest.TestCase):
         grow_button.click()
         WebDriverWait(self.driver, SERVER_TIMEOUT).until(
             element_has_css_class((By.ID, 'results-tab'), 'active'))
-        WebDriverWait(self.driver, SERVER_TIMEOUT).until(
-            element_does_not_exist((By.CLASS_NAME, 'spinner-grow')))
+        time.sleep(SERVER_TIMEOUT)
 
     def get_nof_hits(self):
         """Get nof hits in the growing results"""
