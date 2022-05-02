@@ -40,7 +40,7 @@ export class EnsembleComponent extends CustomComponent {
 
   /**
    * Set visibility of the ensemble
-   * @param value
+   * @param {boolean} value
    */
   setVisibility (value) {
     this.representations.forEach((representation) => representation.setVisibility(value))
@@ -48,7 +48,7 @@ export class EnsembleComponent extends CustomComponent {
 
   /**
    * Auto view an ensemble. Will auto view the first component of the ensemble.
-   * @param duration
+   * @param {number} duration
    */
   autoView (duration) {
     const component = this.parents[0]

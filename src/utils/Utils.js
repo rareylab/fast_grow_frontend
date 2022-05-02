@@ -1,7 +1,7 @@
 export class Utils {
   /**
    * Pause execution of the Program for time ms
-   * @param {Number} time time in ms
+   * @param {number} time time in ms
    */
   static sleep (time) {
     return new Promise(resolve => setTimeout(resolve, time))
@@ -11,8 +11,8 @@ export class Utils {
    * Poll the status of a model until it is not 'pending anymore'
    * @param {object} model model to poll
    * @param {string} pollUrl URL to poll
-   * @param interval time to wait in betweens polls
-   * @param updateCallback function to call after every update of the model
+   * @param {number} interval time to wait in betweens polls
+   * @param {function} updateCallback function to call after every update of the model
    * @returns {Promise<object>} non-pending model
    */
   static async pollModel (model, pollUrl, interval = 1000, updateCallback = undefined) {

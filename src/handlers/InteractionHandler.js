@@ -200,8 +200,8 @@ export class InteractionHandler {
 
   /***
    * Pick an interaction
-   * @param {Integer} interactionID
-   * @param {String} componentName
+   * @param {integer} interactionID
+   * @param {string} componentName
    */
   interactionPicked (interactionID, componentName) {
     if (!this.nglContext.components.has('pickedInteractions')) {

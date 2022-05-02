@@ -128,7 +128,7 @@ export default {
     },
     /**
      * Apply a hit row
-     * @param row hit row
+     * @param {object} row hit row
      */
     applyRow (row) {
       const rowID = parseInt(row.children[0].textContent)
@@ -157,6 +157,7 @@ export default {
     },
     /**
      * Get sort value
+     * @param {object} hit
      */
     sortValue (hit) {
       if (this.sortKey === 'score') {

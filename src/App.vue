@@ -444,7 +444,7 @@ export default {
     },
     /**
      * remove model data and replace with correct but empty datastructures
-     * @param {Object} model model to empty
+     * @param {object} model model to empty
      */
     removeModelData (model) {
       for (const key in model) {

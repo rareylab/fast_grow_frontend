@@ -10,8 +10,8 @@ export class StructureUtils {
    *     name: String
    *   }
    *
-   * @param {Object} stage NGL stage
-   * @param {Object} structure structure object
+   * @param {object} stage NGL stage
+   * @param {object} structure structure object
    * @returns {Promise} structure promise
    */
   static addStructure (stage, structure) {
@@ -64,24 +64,6 @@ export class StructureUtils {
       color: this.pocketCarbons,
       visible: false
     })
-    // TODO care about or remove surfaces and water
-    // if (generateSurface) {
-    //   proteinComponent.addRepresentation('surface', {
-    //     name: 'pocketSurface',
-    //     sele: selectionString,
-    //     color: 'blue',
-    //     opaqueBack: false,
-    //     opacity: 0.5,
-    //     visible: false
-    //   })
-    // }
-    //
-    // const waterSelectionString = activeSiteWaters.toSeleString()
-    // proteinComponent.addRepresentation('ball+stick', {
-    //   name: 'pocketSolvent',
-    //   sele: waterSelectionString,
-    //   visible: false
-    // })
   };
 
   /**
@@ -201,9 +183,9 @@ export class StructureUtils {
 
   /**
    * Add a highlight to a protein pocket
-   * @param proteinComponent
-   * @param selection
-   * @returns {*}
+   * @param {object} proteinComponent
+   * @param {string} selection
+   * @returns {object} representation component
    */
   static addPocketHighlight (proteinComponent, selection) {
     return proteinComponent.addRepresentation('licorice', {

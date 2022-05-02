@@ -84,7 +84,7 @@ export default {
     },
     /**
      * Apply a clicked interation row
-     * @param row interaction row
+     * @param {object} row interaction row
      */
     applyRow (row) {
       const rowID = row.children[0].textContent

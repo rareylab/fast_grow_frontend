@@ -43,7 +43,7 @@ export class StructureModelComponent extends CustomComponent {
 
   /**
    * Center the view on the structure representation
-   * @param duration
+   * @param {number} duration
    */
   autoView (duration) {
     this.representation.parent.autoView(duration)
