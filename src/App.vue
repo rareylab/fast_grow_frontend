@@ -1,301 +1,345 @@
 <template>
-  <div class="container-fluid h-100">
-    <div class="row h-100">
-      <div class="col-7 h-100">
-        <div id="viewport" class="h-100"></div>
+  <div class="h-100 d-flex flex-column">
+    <div id="banner" class="bg-light p-2">
+      <div class="container-fluid">
+        <div class="float-start">
+          <a href="https://www.uni-hamburg.de/" target="_blank">
+            <img src="../public/UHH-Logo_2010_Farbe_RGB.png"
+                 alt="Universität Hamburg - der Forschung, der Lehre, der Bildung">
+          </a>
+        </div>
+        <div class="float-end" style="height: 70px">
+          <div class="py-3">
+            <a href="https://www.zbh.uni-hamburg.de/" target="_blank"
+               style="color: black; text-decoration: none">
+              <h3>ZBH - Center for Bioinformatics</h3>
+            </a>
+          </div>
+        </div>
       </div>
-      <div class="col-5 h-100 d-flex flex-column">
-        <ul class="nav nav-tabs" role="tablist">
-          <li class="nav-item dropdown">
-            <a
-              class="nav-link dropdown-toggle"
-              data-bs-toggle="dropdown"
-              href="#"
-              role="button"
-              aria-expanded="false"
+    </div>
+    <div class="container-fluid flex-grow-1" id="content">
+      <div class="row h-100">
+        <div class="col-7 h-100">
+          <div id="viewport" class="h-100"></div>
+        </div>
+        <div class="col-5 h-100 d-flex flex-column">
+          <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item dropdown">
+              <a
+                  class="nav-link dropdown-toggle"
+                  data-bs-toggle="dropdown"
+                  href="#"
+                  role="button"
+                  aria-expanded="false"
+              >
+                Structure
+              </a>
+              <ul class="dropdown-menu">
+                <li>
+                  <a
+                      class="dropdown-item"
+                      href="#"
+                      id="upload-tab-trigger"
+                      data-bs-toggle="tab"
+                      data-bs-target="#upload-tab"
+                      aria-controls="upload-tab"
+                      aria-selected="true"
+                  >
+                    Upload
+                  </a>
+                </li>
+                <li>
+                  <a
+                      class="dropdown-item"
+                      href="#"
+                      id="ligands-tab-trigger"
+                      data-bs-toggle="tab"
+                      data-bs-target="#ligands-tab"
+                      aria-controls="ligands-tab"
+                  >
+                    Ligands
+                  </a>
+                </li>
+                <li>
+                  <a
+                      class="dropdown-item"
+                      href="#"
+                      id="pockets-tab-trigger"
+                      data-bs-toggle="tab"
+                      data-bs-target="#pockets-tab"
+                      aria-controls="pockets-tab"
+                  >
+                    Pockets
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button
+                  id="cut-tab-trigger"
+                  class="nav-link"
+                  data-bs-toggle="tab"
+                  data-bs-target="#cut-tab"
+                  type="button"
+                  role="tab"
+                  aria-controls="cut-tab"
+              >
+                Cut
+              </button>
+            </li>
+            <li class="nav-item dropdown">
+              <a
+                  class="nav-link dropdown-toggle"
+                  data-bs-toggle="dropdown"
+                  href="#"
+                  role="button"
+                  aria-expanded="false"
+                  id="interactions-dropdown"
+              >
+                Interactions
+              </a>
+              <ul class="dropdown-menu">
+                <li>
+                  <a
+                      class="dropdown-item"
+                      href="#"
+                      id="ligand-interactions-tab-trigger"
+                      data-bs-toggle="tab"
+                      data-bs-target="#ligand-interactions-tab"
+                      aria-controls="ligand-interactions-tab"
+                  >
+                    Ligand
+                  </a>
+                </li>
+                <li>
+                  <a
+                      class="dropdown-item"
+                      href="#"
+                      id="water-interactions-tab-trigger"
+                      data-bs-toggle="tab"
+                      data-bs-target="#water-interactions-tab"
+                      aria-controls="water-interactions-tab"
+                  >
+                    Water
+                  </a>
+                </li>
+                <li>
+                  <a
+                      class="dropdown-item"
+                      href="#"
+                      id="pocket-interactions-tab-trigger"
+                      data-bs-toggle="tab"
+                      data-bs-target="#pocket-interactions-tab"
+                      aria-controls="pocket-interactions-tab"
+                  >
+                    Pocket
+                  </a>
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item dropdown">
+              <a
+                  class="nav-link dropdown-toggle"
+                  data-bs-toggle="dropdown"
+                  href="#"
+                  role="button"
+                  aria-expanded="false"
+                  id="growing-dropdown"
+              >
+                Growing
+              </a>
+              <ul class="dropdown-menu">
+                <li>
+                  <a
+                      class="dropdown-item"
+                      href="#"
+                      id="query-tab-trigger"
+                      data-bs-toggle="tab"
+                      data-bs-target="#query-tab"
+                      aria-controls="query-tab"
+                  >
+                    Query
+                  </a>
+                </li>
+                <li>
+                  <a
+                      class="dropdown-item"
+                      href="#"
+                      id="results-tab-trigger"
+                      data-bs-toggle="tab"
+                      data-bs-target="#results-tab"
+                      aria-controls="results-tab"
+                  >
+                    Results
+                  </a>
+                </li>
+              </ul>
+            </li>
+          </ul>
+          <div class="tab-content flex-grow-1" id="tab-content">
+            <div
+                class="tab-pane fade show active"
+                id="upload-tab"
+                role="tabpanel"
+                aria-labelledby="upload-tab"
             >
-              Structure
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <a
-                  class="dropdown-item"
-                  href="#"
-                  id="upload-tab-trigger"
-                  data-bs-toggle="tab"
-                  data-bs-target="#upload-tab"
-                  aria-controls="upload-tab"
-                  aria-selected="true"
-                >
-                  Upload
-                </a>
-              </li>
-              <li>
-                <a
-                  class="dropdown-item"
-                  href="#"
-                  id="ligands-tab-trigger"
-                  data-bs-toggle="tab"
-                  data-bs-target="#ligands-tab"
-                  aria-controls="ligands-tab"
-                >
-                  Ligands
-                </a>
-              </li>
-              <li>
-                <a
-                  class="dropdown-item"
-                  href="#"
-                  id="pockets-tab-trigger"
-                  data-bs-toggle="tab"
-                  data-bs-target="#pockets-tab"
-                  aria-controls="pockets-tab"
-                >
-                  Pockets
-                </a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item" role="presentation">
-            <button
-              id="cut-tab-trigger"
-              class="nav-link"
-              data-bs-toggle="tab"
-              data-bs-target="#cut-tab"
-              type="button"
-              role="tab"
-              aria-controls="cut-tab"
+              <structure-upload
+                  :polling-server="this.pollingServer"
+                  :submit-error="this.structureUploadModel.structureSubmitError"
+                  @submit="this.structureUpload"
+                  @change="this.structureUploadModel.structureSubmitError = undefined"
+              ></structure-upload>
+            </div>
+            <div
+                class="tab-pane fade h-100"
+                id="ligands-tab"
+                role="tabpanel"
+                aria-labelledby="ligands-tab"
             >
-              Cut
-            </button>
-          </li>
-          <li class="nav-item dropdown">
-            <a
-              class="nav-link dropdown-toggle"
-              data-bs-toggle="dropdown"
-              href="#"
-              role="button"
-              aria-expanded="false"
-              id="interactions-dropdown"
+              <ligand-choice
+                  :view="'ligands-tab'"
+                  :ligands="this.structureUploadModel.ligands"
+                  @register="this.registerListener"
+                  @ligandChosen="this.ligandChosen"
+              ></ligand-choice>
+            </div>
+            <div
+                class="tab-pane fade h-100"
+                id="pockets-tab"
+                role="tabpanel"
+                aria-labelledby="pockets-tab"
             >
-              Interactions
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <a
-                  class="dropdown-item"
-                  href="#"
-                  id="ligand-interactions-tab-trigger"
-                  data-bs-toggle="tab"
-                  data-bs-target="#ligand-interactions-tab"
-                  aria-controls="ligand-interactions-tab"
-                >
-                  Ligand
-                </a>
-              </li>
-              <li>
-                <a
-                  class="dropdown-item"
-                  href="#"
-                  id="water-interactions-tab-trigger"
-                  data-bs-toggle="tab"
-                  data-bs-target="#water-interactions-tab"
-                  aria-controls="water-interactions-tab"
-                >
-                  Water
-                </a>
-              </li>
-              <li>
-                <a
-                  class="dropdown-item"
-                  href="#"
-                  id="pocket-interactions-tab-trigger"
-                  data-bs-toggle="tab"
-                  data-bs-target="#pocket-interactions-tab"
-                  aria-controls="pocket-interactions-tab"
-                >
-                  Pocket
-                </a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item dropdown">
-            <a
-              class="nav-link dropdown-toggle"
-              data-bs-toggle="dropdown"
-              href="#"
-              role="button"
-              aria-expanded="false"
-              id="growing-dropdown"
+              <pocket-choice
+                  :complexes="this.structureUploadModel.complexes"
+                  @pocketChosen="this.pocketChosen"
+              ></pocket-choice>
+            </div>
+            <div
+                class="tab-pane fade h-100"
+                id="cut-tab"
+                role="tabpanel"
+                aria-labelledby="cut-tab"
             >
-              Growing
-            </a>
-            <ul class="dropdown-menu">
-              <li>
-                <a
-                  class="dropdown-item"
-                  href="#"
-                  id="query-tab-trigger"
-                  data-bs-toggle="tab"
-                  data-bs-target="#query-tab"
-                  aria-controls="query-tab"
-                >
-                  Query
-                </a>
-              </li>
-              <li>
-                <a
-                  class="dropdown-item"
-                  href="#"
-                  id="results-tab-trigger"
-                  data-bs-toggle="tab"
-                  data-bs-target="#results-tab"
-                  aria-controls="results-tab"
-                >
-                  Results
-                </a>
-              </li>
-            </ul>
-          </li>
-        </ul>
-        <div class="tab-content flex-grow-1" id="tab-content">
-          <div
-            class="tab-pane fade show active"
-            id="upload-tab"
-            role="tabpanel"
-            aria-labelledby="upload-tab"
-          >
-            <structure-upload
-              :polling-server="this.pollingServer"
-              :submit-error="this.structureUploadModel.structureSubmitError"
-              @submit="this.structureUpload"
-              @change="this.structureUploadModel.structureSubmitError = undefined"
-            ></structure-upload>
-          </div>
-          <div
-            class="tab-pane fade h-100"
-            id="ligands-tab"
-            role="tabpanel"
-            aria-labelledby="ligands-tab"
-          >
-            <ligand-choice
-              :view="'ligands-tab'"
-              :ligands="this.structureUploadModel.ligands"
-              @register="this.registerListener"
-              @ligandChosen="this.ligandChosen"
-            ></ligand-choice>
-          </div>
-          <div
-            class="tab-pane fade h-100"
-            id="pockets-tab"
-            role="tabpanel"
-            aria-labelledby="pockets-tab"
-          >
-            <pocket-choice
-              :complexes="this.structureUploadModel.complexes"
-              @pocketChosen="this.pocketChosen"
-            ></pocket-choice>
-          </div>
-          <div
-            class="tab-pane fade h-100"
-            id="cut-tab"
-            role="tabpanel"
-            aria-labelledby="cut-tab"
-          >
-            <cut
-              :view="'cut-tab'"
-              :polling-server="this.pollingServer"
-              :submit-error="this.cutModel.cutSubmitError"
-              :ligand="this.structureUploadModel.ligand"
-              :anchor="this.cutModel.anchor"
-              :linker="this.cutModel.linker"
-              ref="clip"
-              @register="this.registerListener"
-              @bondChosen="this.bondChosen"
-              @cut="this.bondCut"
-              @reset="this.coreReset"
-            ></cut>
-          </div>
-          <div
-            class="tab-pane fade h-100"
-            id="ligand-interactions-tab"
-            role="tabpanel"
-            aria-labelledby="ligand-interactions-tab"
-          >
-            <interaction-table
-              :view="'ligand-interactions-tab'"
-              :title="'Ligand'"
-              :submit-error="this.interactionModel.interactionError"
-              :loading="this.interactionModel.loadingInteractions"
-              :interactions="this.interactionModel.ligandInteractions"
-              @register="this.registerListener"
-              @picked="this.ligandInteractionPicked"
+              <cut
+                  :view="'cut-tab'"
+                  :polling-server="this.pollingServer"
+                  :submit-error="this.cutModel.cutSubmitError"
+                  :ligand="this.structureUploadModel.ligand"
+                  :anchor="this.cutModel.anchor"
+                  :linker="this.cutModel.linker"
+                  ref="clip"
+                  @register="this.registerListener"
+                  @bondChosen="this.bondChosen"
+                  @cut="this.bondCut"
+                  @reset="this.coreReset"
+              ></cut>
+            </div>
+            <div
+                class="tab-pane fade h-100"
+                id="ligand-interactions-tab"
+                role="tabpanel"
+                aria-labelledby="ligand-interactions-tab"
             >
-            </interaction-table>
-          </div>
-          <div
-            class="tab-pane fade h-100"
-            id="water-interactions-tab"
-            role="tabpanel"
-            aria-labelledby="water-interactions-tab"
-          >
-            <interaction-table
-              :view="'water-interactions-tab'"
-              :title="'Water'"
-              :submit-error="this.interactionModel.interactionError"
-              :loading="this.interactionModel.loadingInteractions"
-              :interactions="this.interactionModel.waterInteractions"
-              @register="this.registerListener"
-              @picked="this.waterInteractionPicked"
+              <interaction-table
+                  :view="'ligand-interactions-tab'"
+                  :title="'Ligand'"
+                  :submit-error="this.interactionModel.interactionError"
+                  :loading="this.interactionModel.loadingInteractions"
+                  :interactions="this.interactionModel.ligandInteractions"
+                  @register="this.registerListener"
+                  @picked="this.ligandInteractionPicked"
+              >
+              </interaction-table>
+            </div>
+            <div
+                class="tab-pane fade h-100"
+                id="water-interactions-tab"
+                role="tabpanel"
+                aria-labelledby="water-interactions-tab"
             >
-            </interaction-table>
-          </div>
-          <div
-            class="tab-pane fade h-100"
-            id="pocket-interactions-tab"
-            role="tabpanel"
-            aria-labelledby="pocket-interactions-tab"
-          >
-            <interaction-picker
-              :view="'pocket-interactions-tab'"
-              :interactions="this.interactionModel.pocketInteractions"
-              :loading="this.interactionModel.loadingInteractions"
-              :submit-error="this.interactionModel.interactionError"
-              @register="this.registerListener"
-              @change="this.toggleInteractionShadows"
-              @picked="this.pocketInteractionPicked"
-              @highlight="this.toggleResidueShadows"
+              <interaction-table
+                  :view="'water-interactions-tab'"
+                  :title="'Water'"
+                  :submit-error="this.interactionModel.interactionError"
+                  :loading="this.interactionModel.loadingInteractions"
+                  :interactions="this.interactionModel.waterInteractions"
+                  @register="this.registerListener"
+                  @picked="this.waterInteractionPicked"
+              >
+              </interaction-table>
+            </div>
+            <div
+                class="tab-pane fade h-100"
+                id="pocket-interactions-tab"
+                role="tabpanel"
+                aria-labelledby="pocket-interactions-tab"
             >
-            </interaction-picker>
+              <interaction-picker
+                  :view="'pocket-interactions-tab'"
+                  :interactions="this.interactionModel.pocketInteractions"
+                  :loading="this.interactionModel.loadingInteractions"
+                  :submit-error="this.interactionModel.interactionError"
+                  @register="this.registerListener"
+                  @change="this.toggleInteractionShadows"
+                  @picked="this.pocketInteractionPicked"
+                  @highlight="this.toggleResidueShadows"
+              >
+              </interaction-picker>
+            </div>
+            <div
+                class="tab-pane fade h-100"
+                id="query-tab"
+                role="tabpanel"
+                aria-labelledby="query-tab"
+            >
+              <query
+                  :polling-server="this.pollingServer"
+                  :submit-error="this.growingModel.growSubmitError"
+                  :fragment-sets="this.growingModel.fragmentSets"
+                  :complexes="this.structureUploadModel.complexes"
+                  :core="this.cutModel.core"
+                  :interactions="this.interactionModel.pickedInteractionsArray"
+                  @grow="this.grow"
+              ></query>
+            </div>
+            <div
+                class="tab-pane fade h-100"
+                id="results-tab"
+                role="tabpanel"
+                aria-labelledby="results-tab"
+            >
+              <results
+                  :loading="this.pollingServer"
+                  :hits="this.growingModel.hitsArray"
+                  :download="this.growingModel.growing ? this.baseUrl + '/growing/' + this.growingModel.growing.id + '/download' : ''"
+                  @picked="this.hitChosen"
+              ></results>
+            </div>
           </div>
-          <div
-            class="tab-pane fade h-100"
-            id="query-tab"
-            role="tabpanel"
-            aria-labelledby="query-tab"
-          >
-            <query
-              :polling-server="this.pollingServer"
-              :submit-error="this.growingModel.growSubmitError"
-              :fragment-sets="this.growingModel.fragmentSets"
-              :complexes="this.structureUploadModel.complexes"
-              :core="this.cutModel.core"
-              :interactions="this.interactionModel.pickedInteractionsArray"
-              @grow="this.grow"
-            ></query>
+        </div>
+      </div>
+    </div>
+    <div id="footer" class="bg-light p-2">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col d-flex flex-row">
+            <a href="about.html" target="_blank"
+               class="flex-grow-1 btn btn-outline-secondary">About</a>
           </div>
-          <div
-            class="tab-pane fade h-100"
-            id="results-tab"
-            role="tabpanel"
-            aria-labelledby="results-tab"
-          >
-            <results
-              :loading="this.pollingServer"
-              :hits="this.growingModel.hitsArray"
-              :download="this.growingModel.growing ? this.baseUrl + '/growing/' + this.growingModel.growing.id + '/download' : ''"
-              @picked="this.hitChosen"
-            ></results>
+          <div class="col d-flex flex-row">
+            <a href="mailto:penner@zbh.uni-hamburg.de"
+               class="flex-grow-1 btn btn-outline-secondary">Feedback</a>
+          </div>
+          <div class="col d-flex flex-row">
+            <a href="https://www.uni-hamburg.de/en/datenschutz.html"
+               target="_blank"
+               class="flex-grow-1 btn btn-outline-secondary">Privacy Policy</a>
+          </div>
+          <div class="col d-flex flex-row">
+            <a href="https://www.zbh.uni-hamburg.de/en/imprint.html"
+               target="_blank"
+               class="flex-grow-1 btn btn-outline-secondary">Legal Notice</a>
           </div>
         </div>
       </div>
@@ -615,6 +659,10 @@ html, body {
 
 #app {
   height: 100%;
+}
+
+#content {
+  overflow: hidden;
 }
 
 #viewport {

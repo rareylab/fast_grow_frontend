@@ -1,11 +1,29 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="en">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
     <title><%= htmlWebpackPlugin.options.title %></title>
+    <!-- Matomo tracking -->
+    <script type="text/javascript">
+      var _paq = window._paq = window._paq || []
+      _paq.push(['disableCookies'])
+      _paq.push(['setDomains', ['*.grow.zbh.uni-hamburg.de']])
+      _paq.push(['trackPageView'])
+      _paq.push(['enableLinkTracking']);
+      (function () {
+        var u = 'https://amd.zbh.uni-hamburg.de/analytics/'
+        _paq.push(['setTrackerUrl', u + 'piwik.php'])
+        _paq.push(['setSiteId', 'TODO'])
+        var d = document, g = d.createElement('script'), s = d.getElementsByTagName('script')[0]
+        g.type = 'text/javascript'
+        g.async = true
+        g.src = u + 'matomo.js'
+        s.parentNode.insertBefore(g, s)
+      })()
+    </script>
   </head>
   <body>
     <noscript>
