@@ -14,7 +14,7 @@ Core FastGrow functionality will be available in BioSolveIT’s [SeeSAR](https:/
 package.
 
 The sibling backend repository can be found
-at [https://github.com/rareylab/fast_grow_frontend](https://github.com/rareylab/fast_grow_frontend)
+at [https://github.com/rareylab/fast_grow_server](https://github.com/rareylab/fast_grow_server)
 
 ## Project Setup
 
