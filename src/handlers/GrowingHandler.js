@@ -115,7 +115,6 @@ export class GrowingHandler {
         body: JSON.stringify(this.makeRequest(ensemble, core, interactions))
       })
       let growing = await response.json()
-      // TODO switch to results after first results
       window.dispatchEvent(new CustomEvent('changeTab', {
         bubbles: true,
         detail: { tabTrigger: 'results-tab-trigger' }

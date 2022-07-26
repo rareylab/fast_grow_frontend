@@ -102,7 +102,6 @@ export class StructureUploadHandler {
     this.model.ligands = ligandsComponent.structureModels
 
     if (ensemble.ligands.length === 1) {
-      // TODO set ligand with linker to ligand
       this.nglContext.registerReplaceComponent('ligand', ligandComponents[0])
       this.model.ligand = ligandComponents[0].structureModel
       if (ensemble.complexes.length === 1) {

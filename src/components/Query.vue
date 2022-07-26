@@ -3,18 +3,23 @@
     <h2>Query</h2>
     <div v-if="this.submitError" class="text-danger">{{ this.submitError }}</div>
     <div class="mb-3">
-      <label for="query-fragment-set" class="form-label">Fragment Set</label>
+      <label for="query-fragment-set" class="form-label">
+        Fragment Set
+      </label> <i class="bi bi-info-circle" title="Fragments to grow with"></i>
       <select id="query-fragment-set" name="fragment-sets" class="form-select">
         <option
           v-for="fragmentSet in this.fragmentSets"
           :key="fragmentSet.id"
           :value="fragmentSet.id"
+          :title="fragmentSet.description"
         >{{ fragmentSet.name }}
         </option>
       </select>
     </div>
     <div class="mb-3">
-      <label for="query-complexes" class="form-label">Protein/Ensemble</label>
+      <label for="query-complexes" class="form-label">
+        Protein/Ensemble
+      </label> <i class="bi bi-info-circle" title="Chosen complexes"></i>
       <div class="border rounded immutable-table">
         <table id="query-complexes" class="table">
           <thead>
@@ -23,7 +28,6 @@
           </tr>
           </thead>
           <tbody>
-          <!-- TODO ignorable complexes -->
           <tr v-for="complex in this.complexes" :key="complex.id">
             <td>{{ complex.name }}</td>
           </tr>
@@ -32,7 +36,9 @@
       </div>
     </div>
     <div class="mb-3">
-      <label for="query-core" class="form-label">Core</label>
+      <label for="query-core" class="form-label">
+        Core
+      </label> <i class="bi bi-info-circle" title="Core to grow"></i>
       <input
         class="form-control"
         type="text"
@@ -43,7 +49,9 @@
       >
     </div>
     <div class="mb-3">
-      <label for="query-interactions" class="form-label">Interactions</label>
+      <label for="query-interactions" class="form-label">
+        Interactions
+      </label> <i class="bi bi-info-circle" title="Interactions / pharmacophoric constraints to use in growing"></i>
       <div class="border rounded immutable-table">
         <table id="query-interactions" class="table">
           <thead>
@@ -53,7 +61,6 @@
           </tr>
           </thead>
           <tbody>
-          <!-- TODO removable interactions? -->
           <tr v-for="interaction in this.sortedInteractions" :key="interaction.id">
             <td>{{ interaction.source }}</td>
             <td>{{ interaction.type }}</td>

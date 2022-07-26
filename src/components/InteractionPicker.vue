@@ -12,6 +12,7 @@
     <div v-if="submitError" class="text-danger">{{ submitError }}</div>
   </div>
   <div class="table-field" ref="table-field">
+    <p>Pick generated counter interactions to grow toward</p>
     <div class="form-check">
       <input
         class="form-check-input"

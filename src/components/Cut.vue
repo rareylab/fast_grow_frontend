@@ -3,7 +3,9 @@
   <div v-if="submitError" class="text-danger">{{ submitError }}</div>
   <div class="mb-3 row">
     <div class="col-auto">
-      <label for="anchor-field" class="form-label">Anchor</label>
+      <label for="anchor-field" class="form-label">
+        Anchor
+      </label> <i class="bi bi-info-circle" title="Last atom before the cut"></i>
     </div>
     <div class="col-auto">
       <input
@@ -21,7 +23,9 @@
   </div>
   <div class="mb-3 row">
     <div class="col-auto">
-      <label for="linker-field" class="form-label">Linker</label>
+      <label for="linker-field" class="form-label">
+        Linker
+      </label> <i class="bi bi-info-circle" title="First atom cut off"></i>
     </div>
     <div class="col-auto">
       <input

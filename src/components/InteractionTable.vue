@@ -12,6 +12,7 @@
     <div v-if="submitError" class="text-danger">{{ submitError }}</div>
   </div>
   <div class="table-field" ref="table-field">
+    <p>{{ this.description }}</p>
     <table class="table">
       <thead>
       <tr>
@@ -42,7 +43,8 @@ export default {
     view: String,
     interactions: Array,
     loading: Boolean,
-    submitError: String
+    submitError: String,
+    description: String
   },
   computed: {
     /**

@@ -1,6 +1,7 @@
 <template>
   <h2 ref="title">Choose Pocket</h2>
   <div class="table-field" ref="table-field">
+    <p>Click on the corresponding row in the table to choose a pocket</p>
     <table class="table">
       <thead>
       <tr>

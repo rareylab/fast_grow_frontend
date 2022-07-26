@@ -1,26 +1,34 @@
 <template>
   <form id="structure-upload-form">
     <h2>Structure Upload</h2>
+    <p>Upload the system to grow in. Multiple PDBs are possible. An SD file can be uploaded to supersede the ligands in
+      the PDB files. Either the ligands in the PDB files or the SD file will be cut to create the core to grow from.</p>
     <div v-if="submitError" class="text-danger">{{ submitError }}</div>
     <div v-if="formError" class="text-danger">{{ formError }}</div>
     <div class="mb-3">
-      <label for="protein-file-field" class="form-label">Protein/Ensemble</label>
+      <label for="protein-file-field" class="form-label">
+        Protein/Ensemble
+      </label> <i class="bi bi-info-circle" title="Upload one or multiple PDB files"></i>
       <input
         class="form-control"
         type="file"
         name="ensemble"
         id="protein-file-field"
+        accept=".pdb"
         @change="proteinFileCheck"
         multiple
       >
     </div>
     <div class="mb-3">
-      <label for="ligand-file-field" class="form-label">Ligand</label>
+      <label for="ligand-file-field" class="form-label">
+        Ligand
+      </label> <i class="bi bi-info-circle" title="Upload a custom ligand SD file to replace ligands in the PDBs"></i>
       <input
         class="form-control"
         type="file"
         name="ligand"
         id="ligand-file-field"
+        accept=".sdf"
         @change="ligandFileCheck"
       >
     </div>

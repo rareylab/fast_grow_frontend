@@ -247,6 +247,7 @@
                   :submit-error="this.interactionModel.interactionError"
                   :loading="this.interactionModel.loadingInteractions"
                   :interactions="this.interactionModel.ligandInteractions"
+                  :description="'Pick ligand interactions to maintain'"
                   @register="this.registerListener"
                   @picked="this.ligandInteractionPicked"
               >
@@ -264,6 +265,7 @@
                   :submit-error="this.interactionModel.interactionError"
                   :loading="this.interactionModel.loadingInteractions"
                   :interactions="this.interactionModel.waterInteractions"
+                  :description="'Pick water interactions to replace'"
                   @register="this.registerListener"
                   @picked="this.waterInteractionPicked"
               >
@@ -428,7 +430,7 @@ export default {
     return {
       // status defining variables
       pollingServer: false,
-      baseUrl: 'http://localhost:8000', // TODO edit in production
+      baseUrl: 'http://kremmen:8000', // TODO edit in production
       // data variables
       // this state is duplicated from the nglContext because the Vue proxy breaks NGL components
       structureUploadModel: {

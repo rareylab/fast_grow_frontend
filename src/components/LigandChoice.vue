@@ -1,6 +1,7 @@
 <template>
   <h2 ref="title">Choose Ligand</h2>
   <div class="table-field" ref="table-field">
+    <p>Click on the ligand in the viewer or the corresponding row in the table</p>
     <table class="table">
       <thead>
       <tr>
